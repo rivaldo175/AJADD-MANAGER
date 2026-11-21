@@ -216,58 +216,95 @@
                 throw new Error("Configuration Appwrite introuvable.");
             }
 
-            // 1. Connexion Appwrite Auth
-            await window.ajaddAccount.createEmailPasswordSession({
-                email: email,
-                password: motDePasse
-            });
+            let utilisateur = null;
 
-            // 2. Récupérer l'utilisateur connecté
-            const utilisateur = await window.ajaddAccount.get();
+            // 1. Vérifier si une session existe déjà
+            try {
 
-            // 3. Rechercher son profil dans AJADD
+                utilisateur = await window.ajaddAccount.get();
+
+                // Si un autre compte est connecté, fermer sa session
+                if (utilisateur.email.toLowerCase() !== email.toLowerCase()) {
+
+                    await window.ajaddAccount.deleteSession({
+                        sessionId: "current"
+                    });
+
+                    utilisateur = null;
+                }
+
+            } catch (erreurSession) {
+
+                if (
+                    erreurSession.code === 401 ||
+                    erreurSession.type === "user_unauthorized"
+                ) {
+                    utilisateur = null;
+                } else {
+                    throw erreurSession;
+                }
+            }
+
+            // 2. Créer une session uniquement si nécessaire
+            if (!utilisateur) {
+
+                await window.ajaddAccount.createEmailPasswordSession({
+                    email: email,
+                    password: motDePasse
+                });
+
+                utilisateur = await window.ajaddAccount.get();
+            }
+
+            // 3. Vérifier le compte connecté
+            if (utilisateur.email.toLowerCase() !== email.toLowerCase()) {
+                throw new Error("Le compte connecté ne correspond pas à cette adresse e-mail.");
+            }
+
+            // 4. Rechercher le profil AJADD
             const resultat = await window.ajaddTablesDB.listRows({
+
                 databaseId: window.AJADD_DATABASE_ID,
+
                 tableId: window.AJADD_TABLES.profils_utilisateurs,
+
                 queries: [
                     Appwrite.Query.equal("user_id", utilisateur.$id)
                 ]
+
             });
 
             if (!resultat.rows || resultat.rows.length === 0) {
-
-                await window.ajaddAccount.deleteSession({
-                    sessionId: "current"
-                });
-
                 throw new Error(
-                    "Aucun profil AJADD associé à ce compte."
+                    "Aucun profil AJADD associé à ce compte. Vérifiez le profil dans Appwrite."
                 );
             }
 
-            // 4. Récupérer le profil
+            // 5. Récupérer le profil
             const profil = resultat.rows[0];
 
-            // 5. Vérifier le statut
+            // 6. Vérifier le statut
             if (profil.statut !== "actif") {
-
-                await window.ajaddAccount.deleteSession({
-                    sessionId: "current"
-                });
-
                 throw new Error(
                     "Ce compte est inactif. Contactez le PDG."
                 );
             }
 
-            // 6. Préparer la session AJADD
+            // 7. Préparer la session AJADD
             const session = {
+
                 userId: utilisateur.$id,
+
                 identifiant: profil.identifiant,
+
                 nom: profil.nom_complet,
+
                 fonction: profil.fonction,
+
                 role: profil.role,
+
                 dateConnexion: new Date().toISOString()
+
             };
 
             sessionStorage.setItem(
@@ -275,18 +312,14 @@
                 JSON.stringify(session)
             );
 
-            // 7. Confirmer la connexion
+            // 8. Confirmer la connexion
             message.style.color = "green";
 
             message.textContent =
-                "Connexion réussie. Bienvenue !";
+                "Connexion réussie. Ouverture du tableau de bord...";
 
-            // 8. Ouvrir le tableau de bord
-            setTimeout(function() {
-
-                window.location.href = "dashboard.html";
-
-            }, 800);
+            // 9. Ouvrir le tableau de bord
+            window.location.href = "dashboard.html";
 
         } catch (erreur) {
 
