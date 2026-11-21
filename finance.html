@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Finance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f5f9;color:#202938}
+header{background:#102c50;color:white;padding:22px}
+header h1{font-size:23px;margin-bottom:7px}
+header p{color:#d7e3f3}
+main{max-width:1200px;margin:auto;padding:20px}
+.back{display:inline-block;margin-bottom:18px;color:#174b83;text-decoration:none;font-weight:bold}
+h2{font-size:19px;margin:22px 0 13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:13px}
+.stat,.panel{background:white;padding:18px;border-radius:12px;box-shadow:0 2px 8px #0000000c}
+.stat p{color:#64748b;font-size:13px;margin-bottom:10px}
+.stat strong{font-size:22px}
+.green{color:#16834a}.red{color:#c0392b}.blue{color:#174b83}
+.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:15px}
+label{display:block;font-size:13px;font-weight:bold;margin:11px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd4df;border-radius:7px;font-size:14px;background:white}
+textarea{min-height:65px;resize:vertical}
+button{border:0;border-radius:7px;padding:11px 15px;background:#174b83;color:white;font-weight:bold;cursor:pointer;margin-top:12px}
+button:hover{opacity:.9}
+.delete{background:#bd3535;padding:7px 10px;margin:0}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{padding:12px 9px;border-bottom:1px solid #e5eaf0;text-align:left;font-size:13px}
+th{background:#f0f4f9}
+.table-wrap{overflow-x:auto}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input{max-width:350px}
+.notice{background:#fff7df;padding:12px;border-radius:8px;color:#765515;font-size:13px;margin-top:15px}
+footer{text-align:center;color:#718096;padding:25px;font-size:12px}
+@media(max-width:600px){main{padding:12px}header{padding:18px}.stat strong{font-size:19px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Gestion financière nationale</p>
+</header>
+
+<main>
+<a class="back" href="dashboard.html">← Retour au tableau de bord</a>
+
+<h2>Tableau de bord financier</h2>
+<div class="stats">
+<div class="stat"><p>RECETTES TOTALES</p><strong class="green" id="totalRecettes">0 FCFA</strong></div>
+<div class="stat"><p>DÉPENSES TOTALES</p><strong class="red" id="totalDepenses">0 FCFA</strong></div>
+<div class="stat"><p>SOLDE DISPONIBLE</p><strong class="blue" id="solde">0 FCFA</strong></div>
+<div class="stat"><p>NOMBRE D'OPÉRATIONS</p><strong id="nombreOperations">0</strong></div>
+</div>
+
+<h2>Enregistrer une opération</h2>
+<div class="forms">
+<div class="panel">
+<h3>Nouvelle recette</h3>
+<form id="formRecette">
+<label>Libellé de la recette</label>
+<input id="nomRecette" required placeholder="Ex : Cotisation des membres">
+<label>Catégorie</label>
+<select id="categorieRecette">
+<option>Cotisation</option>
+<option>Don</option>
+<option>Sponsoring</option>
+<option>Vente</option>
+<option>Participation</option>
+<option>Subvention</option>
+<option>Autre</option>
+</select>
+<label>Montant (FCFA)</label>
+<input id="montantRecette" type="number" min="1" required>
+<label>Date</label>
+<input id="dateRecette" type="date" required>
+<label>Source / Responsable</label>
+<input id="sourceRecette" placeholder="Nom ou provenance">
+<label>Observations</label>
+<textarea id="obsRecette"></textarea>
+<button type="submit">Enregistrer la recette</button>
+</form>
+</div>
+
+<div class="panel">
+<h3>Nouvelle dépense</h3>
+<form id="formDepense">
+<label>Libellé de la dépense</label>
+<input id="nomDepense" required placeholder="Ex : Achat de fournitures">
+<label>Catégorie</label>
+<select id="categorieDepense">
+<option>Fonctionnement</option>
+<option>Événement</option>
+<option>Transport</option>
+<option>Communication</option>
+<option>Formation</option>
+<option>Matériel</option>
+<option>Autre</option>
+</select>
+<label>Montant (FCFA)</label>
+<input id="montantDepense" type="number" min="1" required>
+<label>Date</label>
+<input id="dateDepense" type="date" required>
+<label>Bénéficiaire</label>
+<input id="beneficiaireDepense" placeholder="Nom du bénéficiaire">
+<label>Observations</label>
+<textarea id="obsDepense"></textarea>
+<button type="submit">Enregistrer la dépense</button>
+</form>
+</div>
+</div>
+
+<h2>Gestion des budgets</h2>
+<div class="panel">
+<form id="formBudget">
+<div class="forms">
+<div>
+<label>Intitulé du budget</label>
+<input id="nomBudget" required placeholder="Ex : Budget événement">
+</div>
+<div>
+<label>Montant prévu (FCFA)</label>
+<input id="montantBudget" type="number" min="1" required>
+</div>
+<div>
+<label>Date</label>
+<input id="dateBudget" type="date" required>
+</div>
+</div>
+<button type="submit">Ajouter le budget</button>
+</form>
+<div class="table-wrap" style="margin-top:15px">
+<table>
+<thead><tr><th>Budget</th><th>Montant prévu</th><th>Date</th><th>Action</th></tr></thead>
+<tbody id="listeBudgets"></tbody>
+</table>
+</div>
+</div>
+
+<h2>Historique des opérations</h2>
+<div class="panel">
+<div class="tools">
+<input id="recherche" placeholder="Rechercher une opération...">
+<select id="filtre">
+<option value="tous">Toutes les opérations</option>
+<option value="recette">Recettes</option>
+<option value="depense">Dépenses</option>
+</select>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Date</th><th>Type</th><th>Libellé</th><th>Catégorie</th><th>Montant</th><th>Source / Bénéficiaire</th><th>Action</th></tr>
+</thead>
+<tbody id="listeOperations"></tbody>
+</table>
+</div>
+<p id="aucuneOperation" style="padding:15px;color:#64748b;display:none">Aucune opération enregistrée.</p>
+</div>
+
+<div class="tools" style="margin-top:18px">
+<button type="button" onclick="imprimerRapport()">Imprimer le rapport financier</button>
+<button type="button" onclick="exporterCSV()">Exporter les opérations (CSV)</button>
+</div>
+
+<div class="notice">
+Les données sont enregistrées dans le navigateur de cet ordinateur. Pense à exporter régulièrement tes opérations pour conserver une copie de sauvegarde.
+</div>
+</main>
+
+<footer>AJADD-TOGO — Amical des Jeunes Ambitieux et Dynamiques pour le Développement</footer>
+
+<script>
+const CLE_FINANCE = "ajaddFinance";
+const CLE_BUDGETS = "ajaddBudgets";
+
+function lire(cle){
+    try {
+        const donnees = JSON.parse(localStorage.getItem(cle));
+        return Array.isArray(donnees) ? donnees : [];
+    } catch(e) {
+        return [];
+    }
+}
+
+let operations = lire(CLE_FINANCE);
+let budgets = lire(CLE_BUDGETS);
+
+function sauvegarder(){
+    localStorage.setItem(CLE_FINANCE, JSON.stringify(operations));
+    localStorage.setItem(CLE_BUDGETS, JSON.stringify(budgets));
+}
+
+function montant(n){
+    return Number(n).toLocaleString("fr-FR") + " FCFA";
+}
+
+function echapper(valeur){
+    return String(valeur ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    })[c]);
+}
+
+function afficher(){
+    const recettes = operations.filter(o=>o.type==="recette")
+        .reduce((s,o)=>s+Number(o.montant),0);
+    const depenses = operations.filter(o=>o.type==="depense")
+        .reduce((s,o)=>s+Number(o.montant),0);
+
+    document.getElementById("totalRecettes").textContent=montant(recettes);
+    document.getElementById("totalDepenses").textContent=montant(depenses);
+    document.getElementById("solde").textContent=montant(recettes-depenses);
+    document.getElementById("nombreOperations").textContent=operations.length;
+
+    afficherOperations();
+    afficherBudgets();
+}
+
+function afficherOperations(){
+    const recherche=document.getElementById("recherche").value.toLowerCase();
+    const filtre=document.getElementById("filtre").value;
+    const resultat=operations.filter(o=>{
+        const correspondFiltre=filtre==="tous"||o.type===filtre;
+        const texte=[o.nom,o.categorie,o.source,o.observations].join(" ").toLowerCase();
+        return correspondFiltre && texte.includes(recherche);
+    }).slice().reverse();
+
+    document.getElementById("aucuneOperation").style.display=resultat.length?"none":"block";
+    document.getElementById("listeOperations").innerHTML=resultat.map(o=>`
+    <tr>
+    <td>${echapper(o.date)}</td>
+    <td>${o.type==="recette"?"Recette":"Dépense"}</td>
+    <td>${echapper(o.nom)}</td>
+    <td>${echapper(o.categorie)}</td>
+    <td class="${o.type==="recette"?"green":"red"}">${montant(o.montant)}</td>
+    <td>${echapper(o.source||"—")}</td>
+    <td><button class="delete" onclick="supprimerOperation('${o.id}')">Supprimer</button></td>
+    </tr>`).join("");
+}
+
+function afficherBudgets(){
+    document.getElementById("listeBudgets").innerHTML=budgets.map(b=>`
+    <tr>
+    <td>${echapper(b.nom)}</td>
+    <td>${montant(b.montant)}</td>
+    <td>${echapper(b.date)}</td>
+    <td><button class="delete" onclick="supprimerBudget('${b.id}')">Supprimer</button></td>
+    </tr>`).join("");
+}
+
+document.getElementById("formRecette").addEventListener("submit",function(e){
+    e.preventDefault();
+    operations.push({
+        id:"FIN-"+Date.now(),
+        type:"recette",
+        nom:document.getElementById("nomRecette").value.trim(),
+        categorie:document.getElementById("categorieRecette").value,
+        montant:Number(document.getElementById("montantRecette").value),
+        date:document.getElementById("dateRecette").value,
+        source:document.getElementById("sourceRecette").value.trim(),
+        observations:document.getElementById("obsRecette").value.trim()
+    });
+    sauvegarder();
+    this.reset();
+    afficher();
+    alert("Recette enregistrée avec succès !");
+});
+
+document.getElementById("formDepense").addEventListener("submit",function(e){
+    e.preventDefault();
+    operations.push({
+        id:"FIN-"+Date.now(),
+        type:"depense",
+        nom:document.getElementById("nomDepense").value.trim(),
+        categorie:document.getElementById("categorieDepense").value,
+        montant:Number(document.getElementById("montantDepense").value),
+        date:document.getElementById("dateDepense").value,
+        source:document.getElementById("beneficiaireDepense").value.trim(),
+        observations:document.getElementById("obsDepense").value.trim()
+    });
+    sauvegarder();
+    this.reset();
+    afficher();
+    alert("Dépense enregistrée avec succès !");
+});
+
+document.getElementById("formBudget").addEventListener("submit",function(e){
+    e.preventDefault();
+    budgets.push({
+        id:"BUD-"+Date.now(),
+        nom:document.getElementById("nomBudget").value.trim(),
+        montant:Number(document.getElementById("montantBudget").value),
+        date:document.getElementById("dateBudget").value
+    });
+    sauvegarder();
+    this.reset();
+    afficher();
+    alert("Budget ajouté avec succès !");
+});
+
+function supprimerOperation(id){
+    if(!confirm("Voulez-vous vraiment supprimer cette opération ?"))return;
+    operations=operations.filter(o=>o.id!==id);
+    sauvegarder();
+    afficher();
+}
+
+function supprimerBudget(id){
+    if(!confirm("Supprimer ce budget ?"))return;
+    budgets=budgets.filter(b=>b.id!==id);
+    sauvegarder();
+    afficher();
+}
+
+document.getElementById("recherche").addEventListener("input",afficherOperations);
+document.getElementById("filtre").addEventListener("change",afficherOperations);
+
+function imprimerRapport(){
+    window.print();
+}
+
+function exporterCSV(){
+    const lignes=[
+        ["Date","Type","Libellé","Catégorie","Montant FCFA","Source ou bénéficiaire"],
+        ...operations.map(o=>[o.date,o.type,o.nom,o.categorie,o.montant,o.source||""])
+    ];
+    const csv="\uFEFF"+lignes.map(l=>l.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="rapport-financier-ajadd.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+afficher();
+</script>
+<script src="protection.js"></script>
+</body>
+</html>

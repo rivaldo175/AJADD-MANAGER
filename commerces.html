@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Gestion commerciale</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f2f4f8;color:#222;padding:18px}
+.container{max-width:1200px;margin:auto}
+header{background:#102b50;color:white;padding:22px;border-radius:10px;margin-bottom:20px}
+h1{font-size:23px;margin-bottom:8px}
+h2{font-size:19px;color:#102b50;margin-bottom:15px}
+h3{margin:16px 0 10px}
+.panel{background:white;padding:20px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px #00000012}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+textarea{min-height:70px}
+button{padding:10px 14px;border:0;border-radius:6px;cursor:pointer;font-weight:bold;margin:5px 3px}
+.primary{background:#102b50;color:white}
+.gold{background:#d6a52a;color:#222}
+.danger{background:#c62828;color:white}
+.back{background:#ddd;color:#222}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.stat{background:#f5f7fb;padding:16px;border-radius:8px;border-left:4px solid #d6a52a}
+.stat small{display:block;color:#555;margin-bottom:8px}
+.stat strong{font-size:19px;color:#102b50}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;font-size:14px}
+th{background:#102b50;color:white}
+.message{padding:12px;background:#fff4d6;border-radius:6px;margin-top:12px}
+.hidden{display:none}
+.actions{white-space:nowrap}
+@media(max-width:600px){body{padding:9px}.panel{padding:13px}h1{font-size:20px}}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Gestion des commerces et activités commerciales</p>
+</header>
+
+<div class="panel">
+<button class="back" onclick="location.href='dashboard.html'">← Retour au tableau de bord</button>
+<h2>Tableau de bord commercial</h2>
+
+<div class="grid">
+<div class="stat"><small>Produits et services</small><strong id="nbProduits">0</strong></div>
+<div class="stat"><small>Ventes enregistrées</small><strong id="nbVentes">0</strong></div>
+<div class="stat"><small>Chiffre d'affaires</small><strong id="chiffreAffaires">0 F CFA</strong></div>
+<div class="stat"><small>Dépenses commerciales</small><strong id="totalDepenses">0 F CFA</strong></div>
+<div class="stat"><small>Résultat commercial</small><strong id="resultat">0 F CFA</strong></div>
+</div>
+</div>
+
+<div class="panel">
+<h2>1. Enregistrer un produit ou un service</h2>
+
+<input type="hidden" id="produitId">
+
+<label>Type *</label>
+<select id="typeProduit">
+<option value="Produit">Produit</option>
+<option value="Service">Service</option>
+</select>
+
+<label>Nom du produit ou service *</label>
+<input id="nomProduit" placeholder="Ex : T-shirt AJADD, formation, prestation...">
+
+<label>Catégorie</label>
+<input id="categorie" placeholder="Ex : Habillement, alimentation, formation...">
+
+<div class="grid">
+<div>
+<label>Prix de vente (F CFA) *</label>
+<input type="number" id="prixProduit" min="0" placeholder="Ex : 5000">
+</div>
+<div>
+<label>Stock initial (produits uniquement)</label>
+<input type="number" id="stockInitial" min="0" value="0">
+</div>
+</div>
+
+<label>Responsable commercial</label>
+<input id="responsable" placeholder="Nom du responsable">
+
+<label>Description</label>
+<textarea id="descriptionProduit" placeholder="Informations sur le produit ou le service"></textarea>
+
+<button class="primary" onclick="enregistrerProduit()">Enregistrer</button>
+<button class="back" onclick="viderProduit()">Annuler / Nouveau</button>
+</div>
+
+<div class="panel">
+<h2>2. Catalogue des produits et services</h2>
+<input id="rechercheProduit" placeholder="Rechercher un produit..." oninput="afficherProduits()">
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Type</th>
+<th>Catégorie</th>
+<th>Prix</th>
+<th>Stock disponible</th>
+<th>Responsable</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="listeProduits"></tbody>
+</table>
+</div>
+<p id="aucunProduit" class="message hidden">Aucun produit ou service enregistré.</p>
+</div>
+
+<div class="panel">
+<h2>3. Enregistrer une vente</h2>
+
+<label>Produit ou service *</label>
+<select id="venteProduit">
+<option value="">-- Choisir --</option>
+</select>
+
+<div class="grid">
+<div>
+<label>Quantité *</label>
+<input type="number" id="quantiteVente" min="1" value="1">
+</div>
+<div>
+<label>Prix unitaire (F CFA)</label>
+<input type="number" id="prixVente" min="0" placeholder="Prix du catalogue">
+</div>
+<div>
+<label>Date de vente *</label>
+<input type="date" id="dateVente">
+</div>
+</div>
+
+<label>Nom du client</label>
+<input id="clientVente" placeholder="Nom du client">
+
+<label>Nom du vendeur</label>
+<input id="vendeurVente" placeholder="Nom du vendeur">
+
+<button class="primary" onclick="enregistrerVente()">Enregistrer la vente</button>
+
+<h3>Historique des ventes</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Produit / Service</th>
+<th>Client</th>
+<th>Quantité</th>
+<th>Montant</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="listeVentes"></tbody>
+</table>
+</div>
+<p id="aucuneVente" class="message hidden">Aucune vente enregistrée.</p>
+</div>
+
+<div class="panel">
+<h2>4. Enregistrer une dépense commerciale</h2>
+
+<div class="grid">
+<div>
+<label>Motif de la dépense *</label>
+<input id="motifDepense" placeholder="Ex : Achat de marchandises">
+</div>
+<div>
+<label>Montant (F CFA) *</label>
+<input type="number" id="montantDepense" min="1" placeholder="Ex : 25000">
+</div>
+<div>
+<label>Date *</label>
+<input type="date" id="dateDepense">
+</div>
+</div>
+
+<label>Responsable / Bénéficiaire</label>
+<input id="responsableDepense" placeholder="Nom">
+
+<label>Observations</label>
+<textarea id="observationDepense" placeholder="Détails complémentaires"></textarea>
+
+<button class="primary" onclick="enregistrerDepense()">Enregistrer la dépense</button>
+
+<h3>Historique des dépenses</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Motif</th>
+<th>Responsable</th>
+<th>Montant</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="listeDepenses"></tbody>
+</table>
+</div>
+<p id="aucuneDepense" class="message hidden">Aucune dépense enregistrée.</p>
+</div>
+
+</div>
+
+<script>
+const CLE_COMMERCES = "ajaddCommerces";
+
+let donnees = {
+    produits: [],
+    ventes: [],
+    depenses: []
+};
+
+function identifiant(){
+    return "COM-" + Date.now() + "-" + Math.random().toString(36).slice(2,7);
+}
+
+function lireDonnees(){
+    try{
+        const valeur = JSON.parse(localStorage.getItem(CLE_COMMERCES) || "{}");
+        donnees = {
+            produits: Array.isArray(valeur.produits) ? valeur.produits : [],
+            ventes: Array.isArray(valeur.ventes) ? valeur.ventes : [],
+            depenses: Array.isArray(valeur.depenses) ? valeur.depenses : []
+        };
+    }catch(e){
+        donnees = {produits:[],ventes:[],depenses:[]};
+    }
+}
+
+function sauvegarder(){
+    localStorage.setItem(CLE_COMMERCES,JSON.stringify(donnees));
+}
+
+function fcfa(valeur){
+    return new Intl.NumberFormat("fr-FR").format(Number(valeur)||0)+" F CFA";
+}
+
+function stockDisponible(produit){
+    if(produit.type === "Service") return "-";
+
+    const vendus = donnees.ventes
+        .filter(v=>v.produitId === produit.id)
+        .reduce((total,v)=>total+Number(v.quantite),0);
+
+    return Math.max(0,Number(produit.stockInitial||0)-vendus);
+}
+
+function enregistrerProduit(){
+    const id = document.getElementById("produitId").value;
+    const nom = document.getElementById("nomProduit").value.trim();
+    const prix = Number(document.getElementById("prixProduit").value);
+    const type = document.getElementById("typeProduit").value;
+    const stock = Number(document.getElementById("stockInitial").value);
+
+    if(!nom || document.getElementById("prixProduit").value === "" ||
+       !Number.isFinite(prix) || prix < 0 || stock < 0){
+        alert("Veuillez saisir un nom et un prix valides.");
+        return;
+    }
+
+    const ancien = donnees.produits.find(p=>p.id===id);
+
+    if(ancien && type === "Produit"){
+        const dejaVendus = donnees.ventes
+            .filter(v=>v.produitId===id)
+            .reduce((total,v)=>total+Number(v.quantite),0);
+
+        if(stock < dejaVendus){
+            alert("Le stock initial ne peut pas être inférieur aux quantités déjà vendues.");
+            return;
+        }
+    }
+
+    const produit = {
+        id:id || identifiant(),
+        type,
+        nom,
+        categorie:document.getElementById("categorie").value.trim(),
+        prix,
+        stockInitial:type === "Produit" ? stock : 0,
+        responsable:document.getElementById("responsable").value.trim(),
+        description:document.getElementById("descriptionProduit").value.trim()
+    };
+
+    if(id){
+        const index = donnees.produits.findIndex(p=>p.id===id);
+        if(index!==-1) donnees.produits[index]=produit;
+    }else{
+        donnees.produits.push(produit);
+    }
+
+    sauvegarder();
+    viderProduit();
+    actualiserTout();
+    alert("Produit ou service enregistré avec succès !");
+}
+
+function viderProduit(){
+    ["produitId","nomProduit","categorie","prixProduit","responsable","descriptionProduit"].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+    document.getElementById("stockInitial").value="0";
+    document.getElementById("typeProduit").value="Produit";
+}
+
+function modifierProduit(id){
+    const p=donnees.produits.find(x=>x.id===id);
+    if(!p)return;
+
+    document.getElementById("produitId").value=p.id;
+    document.getElementById("typeProduit").value=p.type;
+    document.getElementById("nomProduit").value=p.nom;
+    document.getElementById("categorie").value=p.categorie||"";
+    document.getElementById("prixProduit").value=p.prix;
+    document.getElementById("stockInitial").value=p.stockInitial||0;
+    document.getElementById("responsable").value=p.responsable||"";
+    document.getElementById("descriptionProduit").value=p.description||"";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function supprimerProduit(id){
+    const utilise=donnees.ventes.some(v=>v.produitId===id);
+
+    if(utilise){
+        alert("Ce produit possède déjà des ventes. Pour conserver l'historique, il ne peut pas être supprimé.");
+        return;
+    }
+
+    if(!confirm("Supprimer ce produit ou service ?"))return;
+
+    donnees.produits=donnees.produits.filter(p=>p.id!==id);
+    sauvegarder();
+    actualiserTout();
+}
+
+function afficherProduits(){
+    const liste=document.getElementById("listeProduits");
+    const recherche=document.getElementById("rechercheProduit").value.toLowerCase();
+    liste.innerHTML="";
+
+    const produits=donnees.produits.filter(p=>
+        (p.nom||"").toLowerCase().includes(recherche) ||
+        (p.categorie||"").toLowerCase().includes(recherche)
+    );
+
+    document.getElementById("aucunProduit").classList.toggle("hidden",produits.length!==0);
+
+    produits.forEach(p=>{
+        const tr=document.createElement("tr");
+        const valeurs=[p.nom,p.type,p.categorie||"-",fcfa(p.prix),stockDisponible(p),p.responsable||"-"];
+
+        valeurs.forEach(v=>{
+            const td=document.createElement("td");
+            td.textContent=v;
+            tr.appendChild(td);
+        });
+
+        const td=document.createElement("td");
+        const modifier=document.createElement("button");
+        modifier.className="gold";
+        modifier.textContent="Modifier";
+        modifier.onclick=()=>modifierProduit(p.id);
+
+        const supprimer=document.createElement("button");
+        supprimer.className="danger";
+        supprimer.textContent="Supprimer";
+        supprimer.onclick=()=>supprimerProduit(p.id);
+
+        td.append(modifier,supprimer);
+        tr.appendChild(td);
+        liste.appendChild(tr);
+    });
+}
+
+function actualiserSelectProduits(){
+    const select=document.getElementById("venteProduit");
+    const ancienne=select.value;
+
+    select.innerHTML='<option value="">-- Choisir --</option>';
+
+    donnees.produits.forEach(p=>{
+        const option=document.createElement("option");
+        option.value=p.id;
+        option.textContent=p.nom+" - "+fcfa(p.prix);
+        select.appendChild(option);
+    });
+
+    if(donnees.produits.some(p=>p.id===ancienne))select.value=ancienne;
+}
+
+document.getElementById("venteProduit").addEventListener("change",()=>{
+    const p=donnees.produits.find(x=>x.id===document.getElementById("venteProduit").value);
+    document.getElementById("prixVente").value=p?p.prix:"";
+});
+
+function enregistrerVente(){
+    const produitId=document.getElementById("venteProduit").value;
+    const p=donnees.produits.find(x=>x.id===produitId);
+    const quantite=Number(document.getElementById("quantiteVente").value);
+    const prixSaisi=document.getElementById("prixVente").value;
+    const prix=prixSaisi==="" ? (p ? Number(p.prix) : 0) : Number(prixSaisi);
+    const date=document.getElementById("dateVente").value;
+
+    if(!p || !Number.isInteger(quantite) || quantite<=0 ||
+       !Number.isFinite(prix) || prix<0 || !date){
+        alert("Veuillez remplir correctement le produit, la quantité, le prix et la date.");
+        return;
+    }
+
+    if(p.type==="Produit" && quantite>stockDisponible(p)){
+        alert("Stock insuffisant. Stock disponible : "+stockDisponible(p));
+        return;
+    }
+
+    donnees.ventes.push({
+        id:identifiant(),
+        produitId:p.id,
+        nomProduit:p.nom,
+        quantite,
+        prix,
+        montant:quantite*prix,
+        date,
+        client:document.getElementById("clientVente").value.trim(),
+        vendeur:document.getElementById("vendeurVente").value.trim()
+    });
+
+    sauvegarder();
+
+    document.getElementById("quantiteVente").value="1";
+    document.getElementById("clientVente").value="";
+    document.getElementById("vendeurVente").value="";
+    document.getElementById("dateVente").value="";
+    actualiserTout();
+
+    alert("Vente enregistrée avec succès !");
+}
+
+function afficherVentes(){
+    const liste=document.getElementById("listeVentes");
+    liste.innerHTML="";
+
+    document.getElementById("aucuneVente").classList.toggle("hidden",donnees.ventes.length!==0);
+
+    donnees.ventes.slice().reverse().forEach(v=>{
+        const tr=document.createElement("tr");
+        [v.date,v.nomProduit,v.client||"-",v.quantite,fcfa(v.montant)].forEach(val=>{
+            const td=document.createElement("td");
+            td.textContent=val;
+            tr.appendChild(td);
+        });
+
+        const td=document.createElement("td");
+        const btn=document.createElement("button");
+        btn.className="danger";
+        btn.textContent="Supprimer";
+        btn.onclick=()=>supprimerVente(v.id);
+        td.appendChild(btn);
+        tr.appendChild(td);
+        liste.appendChild(tr);
+    });
+}
+
+function supprimerVente(id){
+    if(!confirm("Supprimer cette vente ? Le stock sera recalculé."))return;
+    donnees.ventes=donnees.ventes.filter(v=>v.id!==id);
+    sauvegarder();
+    actualiserTout();
+}
+
+function enregistrerDepense(){
+    const motif=document.getElementById("motifDepense").value.trim();
+    const montant=Number(document.getElementById("montantDepense").value);
+    const date=document.getElementById("dateDepense").value;
+
+    if(!motif || !Number.isFinite(montant) || montant<=0 || !date){
+        alert("Veuillez remplir le motif, le montant et la date.");
+        return;
+    }
+
+    donnees.depenses.push({
+        id:identifiant(),
+        motif,
+        montant,
+        date,
+        responsable:document.getElementById("responsableDepense").value.trim(),
+        observations:document.getElementById("observationDepense").value.trim()
+    });
+
+    sauvegarder();
+
+    ["motifDepense","montantDepense","dateDepense","responsableDepense","observationDepense"].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+
+    actualiserTout();
+    alert("Dépense enregistrée avec succès !");
+}
+
+function afficherDepenses(){
+    const liste=document.getElementById("listeDepenses");
+    liste.innerHTML="";
+
+    document.getElementById("aucuneDepense").classList.toggle("hidden",donnees.depenses.length!==0);
+
+    donnees.depenses.slice().reverse().forEach(d=>{
+        const tr=document.createElement("tr");
+        [d.date,d.motif,d.responsable||"-",fcfa(d.montant)].forEach(val=>{
+            const td=document.createElement("td");
+            td.textContent=val;
+            tr.appendChild(td);
+        });
+
+        const td=document.createElement("td");
+        const btn=document.createElement("button");
+        btn.className="danger";
+        btn.textContent="Supprimer";
+        btn.onclick=()=>{
+            if(!confirm("Supprimer cette dépense ?"))return;
+            donnees.depenses=donnees.depenses.filter(x=>x.id!==d.id);
+            sauvegarder();
+            actualiserTout();
+        };
+        td.appendChild(btn);
+        tr.appendChild(td);
+        liste.appendChild(tr);
+    });
+}
+
+function actualiserStatistiques(){
+    const chiffre=donnees.ventes.reduce((s,v)=>s+Number(v.montant||0),0);
+    const depenses=donnees.depenses.reduce((s,d)=>s+Number(d.montant||0),0);
+
+    document.getElementById("nbProduits").textContent=donnees.produits.length;
+    document.getElementById("nbVentes").textContent=donnees.ventes.length;
+    document.getElementById("chiffreAffaires").textContent=fcfa(chiffre);
+    document.getElementById("totalDepenses").textContent=fcfa(depenses);
+    document.getElementById("resultat").textContent=fcfa(chiffre-depenses);
+}
+
+function actualiserTout(){
+    afficherProduits();
+    actualiserSelectProduits();
+    afficherVentes();
+    afficherDepenses();
+    actualiserStatistiques();
+}
+
+function initialiser(){
+    lireDonnees();
+    actualiserTout();
+}
+
+initialiser();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

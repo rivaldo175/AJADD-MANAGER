@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Départements - AJADD MANAGER</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+body {
+    background: #f1f3f7;
+    color: #17263b;
+    padding: 20px;
+}
+.container {
+    max-width: 1100px;
+    margin: auto;
+}
+header {
+    background: #071b36;
+    color: white;
+    padding: 20px;
+    border-bottom: 5px solid #d5aa42;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0 20px;
+}
+header img {
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+    background: white;
+    border-radius: 50%;
+}
+header h1 { font-size: 23px; }
+header p {
+    color: #e6c46d;
+    margin-top: 7px;
+}
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.back {
+    background: #071b36;
+    color: white;
+}
+.panel {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.05);
+}
+h2 {
+    color: #071b36;
+    border-bottom: 2px solid #d5aa42;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+}
+.form-group { margin-bottom: 8px; }
+label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd2dc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+.save {
+    background: #071b36;
+    color: white;
+    margin-top: 12px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+th, td {
+    padding: 13px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background: #071b36;
+    color: white;
+}
+.table-container { overflow-x: auto; }
+.edit {
+    background: #d5aa42;
+    color: #071b36;
+    margin: 3px;
+}
+.delete {
+    background: #a72b2b;
+    color: white;
+    margin: 3px;
+}
+#message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+#connectionStatus {
+    margin: 12px 0;
+    font-weight: bold;
+}
+@media(max-width: 650px) {
+    body { padding: 10px; }
+    .form-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 18px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<button class="back" onclick="location.href='dashboard.html'">
+    ← Retour au tableau de bord
+</button>
+
+<header>
+    <img src="images/logo-ajadd.png" alt="Logo AJADD">
+    <div>
+        <h1>AJADD MANAGER</h1>
+        <p>GESTION DES DÉPARTEMENTS NATIONAUX</p>
+    </div>
+</header>
+
+<p id="connectionStatus">Connexion à Appwrite en cours...</p>
+
+<section class="panel">
+    <h2>Enregistrer un département</h2>
+
+    <form id="departmentForm">
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Nom du département</label>
+                <input type="text" id="nom" required
+                placeholder="Nom du département">
+            </div>
+
+            <div class="form-group">
+                <label>Responsable national(e)</label>
+                <input type="text" id="responsable" required
+                placeholder="Nom et prénoms du responsable">
+            </div>
+
+            <div class="form-group">
+                <label>Téléphone du responsable</label>
+                <input type="tel" id="telephone"
+                placeholder="Numéro de téléphone">
+            </div>
+
+            <div class="form-group">
+                <label>Statut</label>
+                <select id="statut">
+                    <option value="En attente">En attente</option>
+                    <option value="Actif">Actif</option>
+                    <option value="Suspendu">Suspendu</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="grid-column:1/-1">
+                <label>Description et missions</label>
+                <textarea id="description"
+                placeholder="Décrire les missions du département"></textarea>
+            </div>
+        </div>
+
+        <button class="save" id="saveButton" type="submit">
+            ENREGISTRER LE DÉPARTEMENT
+        </button>
+
+        <p id="message"></p>
+    </form>
+</section>
+
+<section class="panel">
+    <h2>Liste des départements nationaux</h2>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>N°</th>
+                    <th>Département</th>
+                    <th>Responsable national</th>
+                    <th>Téléphone</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="departmentTable"></tbody>
+        </table>
+    </div>
+
+    <p id="empty" style="margin-top:15px;color:#777">
+        Aucun département enregistré.
+    </p>
+</section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/appwrite@29.0.0"></script>
+<script src="appwrite.js"></script>
+
+<script>
+const DATABASE_ID = window.AJADD_DATABASE_ID;
+const TABLE_ID = window.AJADD_TABLES.departements;
+
+const tablesDB = window.ajaddTablesDB;
+
+const STORAGE_KEY = "ajaddDepartments";
+
+const departementsInitiaux = [
+    "Services digitaux",
+    "Commerciaux et Entrepreneuriat",
+    "Événementiel et Culture",
+    "Formations et Éducation",
+    "Relations extérieures et Partenariats"
+];
+
+let departments = [];
+let appwriteReady = false;
+
+const table = document.getElementById("departmentTable");
+const message = document.getElementById("message");
+const empty = document.getElementById("empty");
+const connectionStatus = document.getElementById("connectionStatus");
+
+function showMessage(text, color = "green") {
+    message.style.color = color;
+    message.textContent = text;
+}
+
+function getLocalDepartments() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveLocalBackup(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function mapRow(row) {
+    return {
+        id: row.$id,
+        nom: row.nom || "",
+        responsable: row.responsable || "",
+        telephone: row.telephone || "",
+        statut: row.statut || "En attente",
+        description: row.description || "",
+        missions: row.missions || ""
+    };
+}
+
+function renderDepartments() {
+    table.innerHTML = "";
+
+    empty.style.display = departments.length ? "none" : "block";
+
+    departments.forEach((department, index) => {
+        const row = document.createElement("tr");
+
+        const values = [
+            index + 1,
+            department.nom,
+            department.responsable || "À désigner",
+            department.telephone || "Non renseigné",
+            department.statut
+        ];
+
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        const actionCell = document.createElement("td");
+
+        const editButton = document.createElement("button");
+        editButton.textContent = "Modifier";
+        editButton.className = "edit";
+        editButton.onclick = () => editDepartment(department.id);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Supprimer";
+        deleteButton.className = "delete";
+        deleteButton.onclick = () => deleteDepartment(department.id);
+
+        actionCell.appendChild(editButton);
+        actionCell.appendChild(deleteButton);
+
+        row.appendChild(actionCell);
+        table.appendChild(row);
+    });
+}
+
+// SAUVEGARDE DES ANCIENNES DONNÉES DANS APPWRITE
+
+async function migrateOldDepartments(existingRows) {
+    const oldDepartments = getLocalDepartments();
+
+    for (const old of oldDepartments) {
+        const alreadyExists = existingRows.some(
+            row => (row.nom || "").trim().toLowerCase() ===
+                   (old.nom || "").trim().toLowerCase()
+        );
+
+        if (alreadyExists) continue;
+
+        const data = {
+            nom: old.nom || "Département sans nom",
+            responsable: old.responsable || "",
+            telephone: old.telephone || "",
+            statut: old.statut || "En attente",
+            description: old.description || "",
+            missions: old.missions || old.description || ""
+        };
+
+        const created = await tablesDB.createRow({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID,
+            rowId: Appwrite.ID.unique(),
+            data: data
+        });
+
+        existingRows.push(created);
+    }
+
+    return existingRows;
+}
+
+// CHARGEMENT DES DONNÉES APPWRITE
+
+async function loadDepartments() {
+    try {
+        if (!tablesDB || !DATABASE_ID || !TABLE_ID) {
+            throw new Error("Configuration Appwrite introuvable.");
+        }
+
+        // Initialiser les cinq départements si aucune ancienne liste n'existe.
+        if (localStorage.getItem(STORAGE_KEY) === null) {
+            const initial = departementsInitiaux.map(nom => ({
+                nom,
+                responsable: "À désigner",
+                telephone: "",
+                statut: "En attente",
+                description: ""
+            }));
+
+            saveLocalBackup(initial);
+        }
+
+        let result = await tablesDB.listRows({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID
+        });
+
+        let rows = result.rows || [];
+
+        // Importer les anciennes données qui ne sont pas encore dans Appwrite.
+        rows = await migrateOldDepartments(rows);
+
+        // Actualiser la liste depuis Appwrite.
+        result = await tablesDB.listRows({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID
+        });
+
+        rows = result.rows || [];
+
+        departments = rows.map(mapRow);
+
+        // Garder une copie locale de sécurité.
+        saveLocalBackup(departments.map(department => ({
+            nom: department.nom,
+            responsable: department.responsable,
+            telephone: department.telephone,
+            statut: department.statut,
+            description: department.description
+        })));
+
+        appwriteReady = true;
+
+        connectionStatus.textContent =
+            "Connecté à Appwrite — données synchronisées.";
+        connectionStatus.style.color = "green";
+
+        renderDepartments();
+
+    } catch (error) {
+        appwriteReady = false;
+
+        connectionStatus.textContent =
+            "Connexion Appwrite impossible : " + error.message;
+        connectionStatus.style.color = "red";
+
+        // Ne pas perdre les anciennes données locales.
+        departments = getLocalDepartments().map((item, index) => ({
+            ...item,
+            id: "local-" + index
+        }));
+
+        renderDepartments();
+
+        console.error("Erreur Appwrite :", error);
+    }
+}
+
+// AJOUTER UN DÉPARTEMENT
+
+document.getElementById("departmentForm")
+.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    if (!appwriteReady) {
+        showMessage(
+            "Enregistrement impossible : vérifie la connexion et les autorisations Appwrite.",
+            "red"
+        );
+        return;
+    }
+
+    const nom = document.getElementById("nom").value.trim();
+
+    const exists = departments.some(
+        department => department.nom.toLowerCase() === nom.toLowerCase()
+    );
+
+    if (exists) {
+        showMessage("Ce département existe déjà.", "red");
+        return;
+    }
+
+    const data = {
+        nom: nom,
+        responsable: document.getElementById("responsable").value.trim(),
+        telephone: document.getElementById("telephone").value.trim(),
+        statut: document.getElementById("statut").value,
+        description: document.getElementById("description").value.trim(),
+        missions: document.getElementById("description").value.trim()
+    };
+
+    try {
+        await tablesDB.createRow({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID,
+            rowId: Appwrite.ID.unique(),
+            data: data
+        });
+
+        showMessage("Département enregistré dans Appwrite !");
+        this.reset();
+
+        await loadDepartments();
+
+    } catch (error) {
+        showMessage("Erreur d'enregistrement : " + error.message, "red");
+        console.error(error);
+    }
+});
+
+// MODIFIER UN DÉPARTEMENT
+
+async function editDepartment(id) {
+    if (!appwriteReady) {
+        alert("Appwrite n'est pas disponible.");
+        return;
+    }
+
+    const department = departments.find(item => item.id === id);
+    if (!department) return;
+
+    const nom = prompt("Nom du département :", department.nom);
+    if (nom === null || !nom.trim()) return;
+
+    const responsable = prompt(
+        "Nom du responsable national :",
+        department.responsable
+    );
+    if (responsable === null) return;
+
+    const telephone = prompt(
+        "Téléphone du responsable :",
+        department.telephone
+    );
+    if (telephone === null) return;
+
+    const statut = prompt(
+        "Statut : Actif, En attente ou Suspendu",
+        department.statut
+    );
+    if (statut === null) return;
+
+    const description = prompt(
+        "Missions du département :",
+        department.description
+    );
+    if (description === null) return;
+
+    const data = {
+        nom: nom.trim(),
+        responsable: responsable.trim(),
+        telephone: telephone.trim(),
+        statut: statut.trim(),
+        description: description.trim(),
+        missions: description.trim()
+    };
+
+    try {
+        await tablesDB.updateRow({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID,
+            rowId: id,
+            data: data
+        });
+
+        showMessage("Département modifié avec succès !");
+        await loadDepartments();
+
+    } catch (error) {
+        showMessage("Erreur de modification : " + error.message, "red");
+        console.error(error);
+    }
+}
+
+// SUPPRIMER UN DÉPARTEMENT
+
+async function deleteDepartment(id) {
+    if (!appwriteReady) {
+        alert("Appwrite n'est pas disponible.");
+        return;
+    }
+
+    if (!confirm("Voulez-vous supprimer ce département ?")) return;
+
+    try {
+        await tablesDB.deleteRow({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_ID,
+            rowId: id
+        });
+
+        showMessage("Département supprimé.");
+        await loadDepartments();
+
+    } catch (error) {
+        showMessage("Erreur de suppression : " + error.message, "red");
+        console.error(error);
+    }
+}
+
+// DÉMARRAGE
+
+loadDepartments();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

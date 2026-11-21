@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJADD MANAGER - Tableau de bord</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f4f9;
+            color: #222;
+        }
+
+        .header {
+            background: #073b2a;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 { font-size: 23px; }
+
+        .header p {
+            font-size: 13px;
+            margin-top: 5px;
+            color: #d7eadf;
+        }
+
+        .profil {
+            text-align: right;
+        }
+
+        .profil button {
+            background: #c94040;
+            color: white;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 9px;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 75px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #102c23;
+            padding: 20px 12px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            font-size: 17px;
+            margin: 10px 8px 18px;
+            color: #f2c94c;
+        }
+
+        .sidebar a {
+            display: block;
+            text-decoration: none;
+            color: white;
+            padding: 12px;
+            margin-bottom: 5px;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #176b4b;
+        }
+
+        .main {
+            flex: 1;
+            padding: 25px;
+            min-width: 0;
+        }
+
+        .welcome { margin-bottom: 25px; }
+
+        .welcome h2 {
+            color: #073b2a;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .section-title {
+            margin: 25px 0 15px;
+            color: #073b2a;
+            font-size: 18px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+            border-left: 4px solid #168653;
+        }
+
+        .card .icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        .number {
+            font-size: 25px;
+            font-weight: bold;
+            color: #087443;
+            overflow-wrap: anywhere;
+        }
+
+        .card p {
+            font-size: 12px;
+            color: #888;
+            margin-top: 7px;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .module-card {
+            display: block;
+            text-decoration: none;
+            color: #222;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+        }
+
+        .module-card .icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .module-card h3 {
+            font-size: 15px;
+            color: #073b2a;
+        }
+
+        .module-card p {
+            color: #777;
+            font-size: 12px;
+            margin-top: 7px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        @media(max-width: 750px) {
+            .container { flex-direction: column; }
+
+            .sidebar { width: 100%; }
+
+            .sidebar a {
+                display: inline-block;
+                margin: 3px;
+            }
+
+            .main { padding: 15px; }
+
+            .header h1 { font-size: 19px; }
+
+            .profil { text-align: left; }
+        }
+    </style>
+
+    <!-- Vérification de la connexion avant l'affichage -->
+    <script>
+    (function () {
+        document.documentElement.style.visibility = "hidden";
+
+        function rediriger() {
+            sessionStorage.removeItem("ajaddSession");
+            window.location.replace("index.html");
+        }
+
+        try {
+            const session = JSON.parse(
+                sessionStorage.getItem("ajaddSession") || "null"
+            );
+
+            if (!session || !session.identifiant) {
+                rediriger();
+                return;
+            }
+
+            const utilisateurs = JSON.parse(
+                localStorage.getItem("ajaddUtilisateurs") || "[]"
+            );
+
+            const utilisateur = utilisateurs.find(
+                u => u.identifiant === session.identifiant
+            );
+
+            if (!utilisateur || utilisateur.statut !== "actif") {
+                rediriger();
+                return;
+            }
+
+            window.ajaddUtilisateurConnecte = utilisateur;
+
+            document.documentElement.style.visibility = "visible";
+
+        } catch (erreur) {
+            rediriger();
+        }
+    })();
+    </script>
+</head>
+
+<body>
+
+<header class="header">
+    <div>
+        <h1>AJADD MANAGER</h1>
+        <p>Plateforme de gestion de l'AJADD-TOGO</p>
+    </div>
+
+    <div class="profil">
+        <div id="nomConnecte">Responsable connecté</div>
+        <div id="fonctionConnectee" style="font-size:13px;margin-top:5px;color:#d7eadf;">
+            Fonction
+        </div>
+
+        <button onclick="deconnecter()">Déconnexion</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <aside class="sidebar">
+        <h2>MENU PRINCIPAL</h2>
+
+        <a href="dashboard.html" class="active">🏠 Tableau de bord</a>
+
+        <a href="utilisateurs.html" id="lienUtilisateurs" style="display:none;">
+            🔐 Gestion des utilisateurs
+        </a>
+
+        <a href="direction.html">👑 Direction générale</a>
+        <a href="bureau.html">🏛️ Bureau exécutif national</a>
+        <a href="departements.html">🏢 Départements nationaux</a>
+        <a href="responsables.html">👤 Responsables nationaux</a>
+        <a href="membres.html">👥 Gestion des membres</a>
+        <a href="regions.html">🗺️ Bureaux régionaux</a>
+        <a href="responsables-regionaux.html">👥 Responsables régionaux</a>
+        <a href="evenements.html">🎉 Événements</a>
+        <a href="projets-evenements.html">📋 Projets événementiels</a>
+        <a href="budget-evenements.html">💵 Budgets événementiels</a>
+        <a href="formations.html">🎓 Formations</a>
+        <a href="commerces.html">🛍️ Commerces internes</a>
+        <a href="partenaires.html">🤝 Partenaires</a>
+        <a href="finance.html">💰 Finance</a>
+        <a href="documents.html">📁 Documents et archives</a>
+        <a href="communication.html">📢 Communication</a>
+    </aside>
+
+    <main class="main">
+
+        <section class="welcome">
+            <h2>Bienvenue sur AJADD MANAGER</h2>
+            <p>
+                Gérez les activités, les responsables, les événements,
+                les finances et les différents services de l'AJADD-TOGO.
+            </p>
+        </section>
+
+        <h2 class="section-title">📊 Statistiques générales</h2>
+
+        <div class="cards">
+
+            <div class="card" data-access="membres.html">
+                <div class="icon">👥</div>
+                <h3>Membres</h3>
+                <div class="number" id="totalMembres">0</div>
+                <p>Membres enregistrés</p>
+            </div>
+
+            <div class="card" data-access="departements.html">
+                <div class="icon">🏢</div>
+                <h3>Départements nationaux</h3>
+                <div class="number" id="totalDepartements">0</div>
+                <p>Départements enregistrés</p>
+            </div>
+
+            <div class="card" data-access="regions.html">
+                <div class="icon">🗺️</div>
+                <h3>Régions</h3>
+                <div class="number" id="totalRegions">0</div>
+                <p>Bureaux régionaux enregistrés</p>
+            </div>
+
+            <div class="card" data-access="responsables.html">
+                <div class="icon">👤</div>
+                <h3>Responsables nationaux</h3>
+                <div class="number" id="totalResponsables">0</div>
+                <p>Responsables enregistrés</p>
+            </div>
+
+            <div class="card" data-access="evenements.html">
+                <div class="icon">🎉</div>
+                <h3>Événements</h3>
+                <div class="number" id="totalEvenements">0</div>
+                <p>Événements enregistrés</p>
+            </div>
+
+            <div class="card" data-access="formations.html">
+                <div class="icon">🎓</div>
+                <h3>Formations</h3>
+                <div class="number" id="totalFormations">0</div>
+                <p>Formations enregistrées</p>
+            </div>
+
+            <div class="card" data-access="finance.html">
+                <div class="icon">💰</div>
+                <h3>Solde financier</h3>
+                <div class="number" id="soldeFinance">0 FCFA</div>
+                <p>Recettes moins dépenses</p>
+            </div>
+
+            <div class="card" data-access="documents.html">
+                <div class="icon">📁</div>
+                <h3>Documents et archives</h3>
+                <div class="number" id="totalDocuments">0</div>
+                <p>Documents enregistrés</p>
+            </div>
+
+            <div class="card" data-access="communication.html">
+                <div class="icon">📢</div>
+                <h3>Communications</h3>
+                <div class="number" id="totalCommunications">0</div>
+                <p>Publications publiées</p>
+            </div>
+
+        </div>
+
+        <h2 class="section-title">⚙️ Accès rapide aux modules</h2>
+
+        <div class="module-grid">
+
+            <a href="direction.html" class="module-card">
+                <div class="icon">👑</div>
+                <h3>Direction générale</h3>
+                <p>Gérer le PDG et le DG</p>
+            </a>
+
+            <a href="bureau.html" class="module-card">
+                <div class="icon">🏛️</div>
+                <h3>Bureau exécutif</h3>
+                <p>Gérer les membres du bureau national</p>
+            </a>
+
+            <a href="evenements.html" class="module-card">
+                <div class="icon">🎉</div>
+                <h3>Événements</h3>
+                <p>Créer et gérer les événements</p>
+            </a>
+
+            <a href="finance.html" class="module-card">
+                <div class="icon">💰</div>
+                <h3>Gestion financière</h3>
+                <p>Suivre les recettes et les dépenses</p>
+            </a>
+
+            <a href="documents.html" class="module-card">
+                <div class="icon">📁</div>
+                <h3>Documents et archives</h3>
+                <p>Gérer les documents administratifs</p>
+            </a>
+
+            <a href="communication.html" class="module-card">
+                <div class="icon">📢</div>
+                <h3>Communication</h3>
+                <p>Gérer les annonces et publications</p>
+            </a>
+
+            <a href="formations.html" class="module-card">
+                <div class="icon">🎓</div>
+                <h3>Formations</h3>
+                <p>Organiser les formations</p>
+            </a>
+
+            <a href="partenaires.html" class="module-card">
+                <div class="icon">🤝</div>
+                <h3>Partenaires</h3>
+                <p>Gérer les partenaires de l'association</p>
+            </a>
+
+        </div>
+
+    </main>
+</div>
+
+<footer class="footer">
+    AJADD-TOGO | Amical des Jeunes Ambitieux et Dynamiques pour le Développement
+    <br>
+    AJADD MANAGER - Administration nationale
+</footer>
+
+<script>
+    const utilisateur = window.ajaddUtilisateurConnecte;
+
+    // Afficher le profil connecté
+    document.getElementById("nomConnecte").textContent =
+        utilisateur.nom || utilisateur.identifiant;
+
+    document.getElementById("fonctionConnectee").textContent =
+        utilisateur.fonction || utilisateur.role || "Responsable";
+
+    // Déconnexion
+    function deconnecter() {
+        if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+            sessionStorage.removeItem("ajaddSession");
+            window.location.replace("index.html");
+        }
+    }
+
+    // Vérifier les rôles
+    const estPDG = utilisateur.role === "administrateur_principal";
+    const estDG = utilisateur.role === "directrice_generale";
+    const accesTotal = estPDG || estDG || utilisateur.accesTotal === true;
+
+    // Le PDG seul peut gérer les utilisateurs
+    if (estPDG) {
+        document.getElementById("lienUtilisateurs").style.display = "block";
+    }
+
+    // Normaliser les noms de permissions
+    function normaliser(valeur) {
+        return String(valeur || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\.html$/g, "")
+            .replace(/[^a-z0-9]/g, "");
+    }
+
+    // Permissions possibles pour chaque module
+    const aliasPermissions = {
+        "direction.html": ["direction", "directiongenerale"],
+        "bureau.html": ["bureau", "bureauexecutif", "bureauexecutifnational"],
+        "departements.html": ["departements", "departementsnationaux"],
+        "responsables.html": ["responsables", "responsablesnationaux"],
+        "membres.html": ["membres", "gestiondesmembres"],
+        "regions.html": ["regions", "bureauxregionaux"],
+        "responsables-regionaux.html": ["responsablesregionaux"],
+        "evenements.html": ["evenements"],
+        "projets-evenements.html": ["projetsevenementiels", "projetsevenements"],
+        "budget-evenements.html": ["budgetevenements", "budgetsevenementiels"],
+        "formations.html": ["formations"],
+        "commerces.html": ["commerces", "commercesinternes"],
+        "partenaires.html": ["partenaires"],
+        "finance.html": ["finance", "gestionfinanciere"],
+        "documents.html": ["documents", "documentsetarchives"],
+        "communication.html": ["communication", "communications"]
+    };
+
+    // Lire les permissions du compte
+    function obtenirPermissions() {
+        const source = utilisateur.permissions ||
+                       utilisateur.modulesAutorises ||
+                       utilisateur.accesModules ||
+                       [];
+
+        if (Array.isArray(source)) {
+            return source.map(normaliser);
+        }
+
+        if (source && typeof source === "object") {
+            return Object.keys(source)
+                .filter(cle => source[cle] === true)
+                .map(normaliser);
+        }
+
+        return [];
+    }
+
+    const permissions = obtenirPermissions();
+
+    function autorise(fichier) {
+        if (fichier === "dashboard.html") return true;
+        if (fichier === "utilisateurs.html") return estPDG;
+        if (accesTotal) return true;
+
+        const aliases = aliasPermissions[fichier] || [];
+        const valeurs = [normaliser(fichier), ...aliases.map(normaliser)];
+
+        return valeurs.some(valeur => permissions.includes(valeur));
+    }
+
+    // Masquer les modules non autorisés dans le menu
+    document.querySelectorAll(".sidebar a[href]").forEach(lien => {
+        const fichier = lien.getAttribute("href");
+
+        if (!autorise(fichier)) {
+            lien.style.display = "none";
+        }
+    });
+
+    // Masquer les accès rapides non autorisés
+    document.querySelectorAll(".module-card[href]").forEach(carte => {
+        const fichier = carte.getAttribute("href");
+
+        if (!autorise(fichier)) {
+            carte.style.display = "none";
+        }
+    });
+
+    // Masquer les statistiques non autorisées
+    document.querySelectorAll("[data-access]").forEach(carte => {
+        const fichier = carte.getAttribute("data-access");
+
+        if (!autorise(fichier)) {
+            carte.style.display = "none";
+        }
+    });
+
+    // Lecture des données enregistrées
+    function lireDonnees(cle) {
+        try {
+            const donnees = JSON.parse(localStorage.getItem(cle));
+            return Array.isArray(donnees) ? donnees : [];
+        } catch (erreur) {
+            return [];
+        }
+    }
+
+    function montantFCFA(valeur) {
+        return Number(valeur).toLocaleString("fr-FR") + " FCFA";
+    }
+
+    function afficherNombre(id, nombre) {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent = nombre;
+        }
+    }
+
+    // Actualiser les statistiques
+    function actualiserTableauDeBord() {
+
+        const membres = lireDonnees("ajaddMembers");
+        const departements = lireDonnees("ajaddDepartments");
+        const regions = lireDonnees("ajaddRegions");
+        const responsables = lireDonnees("ajaddResponsables");
+
+        afficherNombre("totalMembres", membres.length);
+        afficherNombre("totalDepartements", departements.length);
+        afficherNombre("totalRegions", regions.length);
+        afficherNombre("totalResponsables", responsables.length);
+
+        const evenements = lireDonnees("ajaddEvenements");
+        const formations = lireDonnees("ajaddFormations");
+
+        afficherNombre("totalEvenements", evenements.length);
+        afficherNombre("totalFormations", formations.length);
+
+        const operations = lireDonnees("ajaddFinance");
+
+        const recettes = operations
+            .filter(o => o.type === "recette")
+            .reduce((total, o) => total + Number(o.montant || 0), 0);
+
+        const depenses = operations
+            .filter(o => o.type === "depense")
+            .reduce((total, o) => total + Number(o.montant || 0), 0);
+
+        afficherNombre("soldeFinance", montantFCFA(recettes - depenses));
+
+        const documents = lireDonnees("ajaddDocuments");
+        afficherNombre("totalDocuments", documents.length);
+
+        const communications = lireDonnees("ajaddCommunications");
+
+        const publications = communications.filter(
+            c => c.statut === "Publié"
+        );
+
+        afficherNombre("totalCommunications", publications.length);
+    }
+
+    actualiserTableauDeBord();
+
+    window.addEventListener("pageshow", actualiserTableauDeBord);
+    window.addEventListener("storage", actualiserTableauDeBord);
+</script>
+
+</body>
+</html>

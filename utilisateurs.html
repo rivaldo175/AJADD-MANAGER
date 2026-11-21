@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion des utilisateurs | AJADD MANAGER</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f4f9;
+    color: #222;
+}
+
+header {
+    background: #082b4c;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+header h1 {
+    font-size: 21px;
+}
+
+header p {
+    font-size: 12px;
+    margin-top: 5px;
+    color: #e5c36c;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.topbar h2 {
+    color: #082b4c;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.card h3 {
+    color: #082b4c;
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 14px 0 7px;
+    color: #183653;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+button {
+    padding: 11px 16px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.primary {
+    background: #082b4c;
+    color: white;
+    margin-top: 18px;
+}
+
+.primary:hover {
+    background: #b58b25;
+}
+
+.secondary {
+    background: #e8edf2;
+    color: #183653;
+}
+
+.danger {
+    background: #fce4e4;
+    color: #a32121;
+}
+
+.success {
+    background: #e1f5e9;
+    color: #087443;
+}
+
+.permissions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.permission {
+    background: #f5f7fa;
+    padding: 10px;
+    border-radius: 7px;
+    font-size: 13px;
+}
+
+.permission label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.permission input {
+    width: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+
+th {
+    background: #f3f5f8;
+    color: #082b4c;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.actif {
+    background: #e1f5e9;
+    color: #087443;
+}
+
+.suspendu {
+    background: #fce4e4;
+    color: #a32121;
+}
+
+.message {
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.info {
+    background: #f5f1e6;
+    color: #765c1d;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+.hidden {
+    display: none;
+}
+
+.footer {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+    font-size: 12px;
+}
+
+@media(max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h1>AJADD MANAGER</h1>
+        <p>ADMINISTRATION DES COMPTES UTILISATEURS</p>
+    </div>
+    <div>👑 Espace du PDG</div>
+</header>
+
+<div class="container">
+
+    <div class="topbar">
+        <h2>Gestion des utilisateurs</h2>
+        <button class="secondary" onclick="retourDashboard()">
+            ← Tableau de bord
+        </button>
+    </div>
+
+    <div class="info">
+        Le PDG est le seul utilisateur autorisé à créer, modifier,
+        suspendre ou réactiver les comptes des membres.
+        La Directrice générale possède un accès complet aux modules,
+        mais ne gère pas les comptes.
+    </div>
+
+    <section class="card">
+        <h3 id="titreFormulaire">➕ Créer un compte utilisateur</h3>
+
+        <form id="formUtilisateur">
+
+            <input type="hidden" id="userId">
+
+            <label>Nom et prénom</label>
+            <input type="text" id="nom" required placeholder="Nom complet">
+
+            <label>Identifiant de connexion</label>
+            <input type="text" id="identifiant" required placeholder="Identifiant unique">
+
+            <label>Fonction</label>
+            <select id="fonction" required>
+                <option value="">Choisir une fonction</option>
+                <option value="Directrice générale">Directrice générale</option>
+                <option value="Secrétaire général">Secrétaire général</option>
+                <option value="Secrétaire général adjoint">Secrétaire général adjoint</option>
+                <option value="Trésorier général">Trésorier général</option>
+                <option value="Trésorier général adjoint">Trésorier général adjoint</option>
+                <option value="Premier conseiller">Premier conseiller</option>
+                <option value="Deuxième conseiller">Deuxième conseiller</option>
+                <option value="Responsable de département">Responsable de département</option>
+                <option value="Responsable régional">Responsable régional</option>
+                <option value="Membre">Membre</option>
+                <option value="Autre responsable">Autre responsable</option>
+            </select>
+
+            <label>Mot de passe <span id="aideMotDePasse">(obligatoire à la création)</span></label>
+            <input type="password" id="motDePasse" minlength="8"
+                   placeholder="Minimum 8 caractères">
+
+            <label>Confirmer le mot de passe</label>
+            <input type="password" id="confirmation"
+                   placeholder="Confirmer le mot de passe">
+
+            <div id="zonePermissions">
+                <label>Modules autorisés</label>
+                <div class="permissions" id="listePermissions"></div>
+            </div>
+
+            <button type="submit" class="primary" id="boutonEnregistrer">
+                CRÉER LE COMPTE
+            </button>
+
+            <button type="button" class="secondary hidden" id="annulerModification"
+                    onclick="annulerEdition()">
+                Annuler la modification
+            </button>
+
+            <p id="messageFormulaire" class="message"></p>
+
+        </form>
+    </section>
+
+    <section class="card">
+        <h3>👥 Comptes enregistrés</h3>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Identifiant</th>
+                        <th>Fonction</th>
+                        <th>Accès</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="listeUtilisateurs"></tbody>
+            </table>
+        </div>
+
+        <p id="aucunUtilisateur" class="message">
+            Aucun compte supplémentaire enregistré.
+        </p>
+    </section>
+
+</div>
+
+<footer class="footer">
+    AJADD-TOGO © 2026 | AJADD MANAGER
+</footer>
+
+<script>
+
+// =====================================
+// PROTECTION DE LA PAGE
+// =====================================
+
+const session = JSON.parse(
+    sessionStorage.getItem("ajaddSession") || "null"
+);
+
+if (!session || session.role !== "administrateur_principal") {
+    alert("Accès réservé au PDG / Président.");
+    window.location.replace("index.html");
+}
+
+// =====================================
+// LISTE DES MODULES
+// =====================================
+
+const modules = [
+    ["dashboard.html", "Tableau de bord"],
+    ["direction.html", "Direction générale"],
+    ["bureau.html", "Bureau exécutif national"],
+    ["departements.html", "Départements nationaux"],
+    ["responsables.html", "Responsables nationaux"],
+    ["membres.html", "Gestion des membres"],
+    ["regions.html", "Bureaux régionaux"],
+    ["responsables-regionaux.html", "Responsables régionaux"],
+    ["evenements.html", "Événements"],
+    ["projets-evenements.html", "Projets événementiels"],
+    ["budget-evenements.html", "Budgets événementiels"],
+    ["formations.html", "Formations"],
+    ["commerces.html", "Commerces internes"],
+    ["partenaires.html", "Partenaires"],
+    ["finance.html", "Finance"],
+    ["documents.html", "Documents et archives"],
+    ["communication.html", "Communication"]
+];
+
+// =====================================
+// STOCKAGE
+// =====================================
+
+function lireUtilisateurs() {
+    try {
+        const donnees = JSON.parse(
+            localStorage.getItem("ajaddUtilisateurs") || "[]"
+        );
+
+        return Array.isArray(donnees) ? donnees : [];
+    } catch (erreur) {
+        return [];
+    }
+}
+
+function enregistrerUtilisateurs(utilisateurs) {
+    localStorage.setItem(
+        "ajaddUtilisateurs",
+        JSON.stringify(utilisateurs)
+    );
+}
+
+function creerId() {
+    return "AJADD-" + Date.now() + "-" +
+        Math.floor(Math.random() * 1000);
+}
+
+// =====================================
+// AFFICHAGE DES PERMISSIONS
+// =====================================
+
+function afficherPermissions(selection = []) {
+
+    const zone = document.getElementById("listePermissions");
+
+    zone.innerHTML = "";
+
+    modules.forEach(function(module) {
+
+        const coche = selection.includes(module[0]) ? "checked" : "";
+
+        const div = document.createElement("div");
+        div.className = "permission";
+
+        const label = document.createElement("label");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = module[0];
+        checkbox.checked = selection.includes(module[0]);
+
+        const texte = document.createTextNode(module[1]);
+
+        label.appendChild(checkbox);
+        label.appendChild(texte);
+        div.appendChild(label);
+        zone.appendChild(div);
+    });
+}
+
+// =====================================
+// PERMISSIONS AUTOMATIQUES PAR FONCTION
+// =====================================
+
+function permissionsParFonction(fonction) {
+
+    const acces = {
+        "Secrétaire général": [
+            "dashboard.html",
+            "bureau.html",
+            "departements.html",
+            "responsables.html",
+            "membres.html",
+            "documents.html",
+            "communication.html"
+        ],
+
+        "Secrétaire général adjoint": [
+            "dashboard.html",
+            "documents.html"
+        ],
+
+        "Trésorier général": [
+            "dashboard.html",
+            "finance.html",
+            "budget-evenements.html"
+        ],
+
+        "Trésorier général adjoint": [
+            "dashboard.html",
+            "finance.html",
+            "budget-evenements.html"
+        ],
+
+        "Responsable régional": [
+            "dashboard.html",
+            "regions.html",
+            "responsables-regionaux.html",
+            "membres.html",
+            "evenements.html"
+        ],
+
+        "Membre": [
+            "dashboard.html",
+            "membres.html"
+        ]
+    };
+
+    return acces[fonction] || ["dashboard.html"];
+}
+
+// =====================================
+// AFFICHAGE DES COMPTES
+// =====================================
+
+function afficherUtilisateurs() {
+
+    const utilisateurs = lireUtilisateurs();
+
+    const tableau = document.getElementById("listeUtilisateurs");
+    const aucun = document.getElementById("aucunUtilisateur");
+
+    tableau.innerHTML = "";
+
+    const autresComptes = utilisateurs.filter(function(u) {
+        return u.role !== "administrateur_principal";
+    });
+
+    aucun.style.display = autresComptes.length ? "none" : "block";
+
+    autresComptes.forEach(function(u) {
+
+        const ligne = document.createElement("tr");
+
+        function cellule(texte) {
+            const td = document.createElement("td");
+            td.textContent = texte;
+            return td;
+        }
+
+        ligne.appendChild(cellule(u.nom));
+        ligne.appendChild(cellule(u.identifiant));
+        ligne.appendChild(cellule(u.fonction));
+
+        const acces = u.accesTotal
+            ? "Accès total"
+            : (u.permissions || []).length + " module(s)";
+
+        ligne.appendChild(cellule(acces));
+
+        const statut = document.createElement("td");
+        const badge = document.createElement("span");
+
+        badge.className = "status " +
+            (u.statut === "actif" ? "actif" : "suspendu");
+
+        badge.textContent =
+            u.statut === "actif" ? "Actif" : "Suspendu";
+
+        statut.appendChild(badge);
+        ligne.appendChild(statut);
+
+        const actions = document.createElement("td");
+        const zone = document.createElement("div");
+        zone.className = "actions";
+
+        const modifier = document.createElement("button");
+        modifier.className = "secondary";
+        modifier.textContent = "Modifier";
+        modifier.onclick = function() {
+            modifierUtilisateur(u.id);
+        };
+
+        const suspendre = document.createElement("button");
+        suspendre.className =
+            u.statut === "actif" ? "danger" : "success";
+
+        suspendre.textContent =
+            u.statut === "actif" ? "Suspendre" : "Réactiver";
+
+        suspendre.onclick = function() {
+            changerStatut(u.id);
+        };
+
+        zone.appendChild(modifier);
+        zone.appendChild(suspendre);
+        actions.appendChild(zone);
+        ligne.appendChild(actions);
+
+        tableau.appendChild(ligne);
+    });
+}
+
+// =====================================
+// CHANGEMENT DE FONCTION
+// =====================================
+
+document.getElementById("fonction").addEventListener("change", function() {
+
+    const fonction = this.value;
+
+    if (fonction === "Directrice générale") {
+        afficherPermissions(modules.map(m => m[0]));
+        document.getElementById("zonePermissions").style.display = "none";
+        return;
+    }
+
+    document.getElementById("zonePermissions").style.display = "block";
+
+    const fonctionsPersonnalisees = [
+        "Premier conseiller",
+        "Deuxième conseiller",
+        "Responsable de département",
+        "Autre responsable"
+    ];
+
+    if (fonctionsPersonnalisees.includes(fonction)) {
+        afficherPermissions(["dashboard.html"]);
+    } else {
+        afficherPermissions(permissionsParFonction(fonction));
+    }
+});
+
+// =====================================
+// CRÉATION ET MODIFICATION
+// =====================================
+
+document.getElementById("formUtilisateur").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const nom = document.getElementById("nom").value.trim();
+    const identifiant = document.getElementById("identifiant").value.trim();
+    const fonction = document.getElementById("fonction").value;
+    const motDePasse = document.getElementById("motDePasse").value;
+    const confirmation = document.getElementById("confirmation").value;
+    const id = document.getElementById("userId").value;
+
+    const message = document.getElementById("messageFormulaire");
+
+    let utilisateurs = lireUtilisateurs();
+
+    const modification = Boolean(id);
+
+    if (!modification && !motDePasse) {
+        message.style.color = "red";
+        message.textContent = "Veuillez choisir un mot de passe.";
+        return;
+    }
+
+    if (motDePasse && motDePasse.length < 8) {
+        message.style.color = "red";
+        message.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+        return;
+    }
+
+    if (motDePasse !== confirmation) {
+        message.style.color = "red";
+        message.textContent = "Les mots de passe ne correspondent pas.";
+        return;
+    }
+
+    const doublon = utilisateurs.some(function(u) {
+        return u.identifiant.toLowerCase() === identifiant.toLowerCase()
+            && u.id !== id;
+    });
+
+    if (doublon) {
+        message.style.color = "red";
+        message.textContent = "Cet identifiant est déjà utilisé.";
+        return;
+    }
+
+    if (!fonction) {
+        message.style.color = "red";
+        message.textContent = "Veuillez choisir une fonction.";
+        return;
+    }
+
+    const accesTotal = fonction === "Directrice générale";
+
+    let permissions = accesTotal
+        ? modules.map(m => m[0])
+        : Array.from(
+            document.querySelectorAll("#listePermissions input:checked")
+          ).map(c => c.value);
+
+    const compteExistant = utilisateurs.find(u => u.id === id);
+
+    const compte = {
+        id: id || creerId(),
+        nom: nom,
+        identifiant: identifiant,
+        motDePasse: motDePasse || compteExistant?.motDePasse,
+        fonction: fonction,
+        role: accesTotal ? "directrice_generale" : "responsable",
+        statut: compteExistant ? compteExistant.statut : "actif",
+        accesTotal: accesTotal,
+        gestionUtilisateurs: false,
+        permissions: permissions,
+        dateCreation: compteExistant
+            ? compteExistant.dateCreation
+            : new Date().toISOString()
+    };
+
+    if (modification) {
+
+        utilisateurs = utilisateurs.map(function(u) {
+            return u.id === id ? compte : u;
+        });
+
+        message.style.color = "green";
+        message.textContent = "Compte modifié avec succès.";
+
+    } else {
+
+        utilisateurs.push(compte);
+
+        message.style.color = "green";
+        message.textContent = "Compte créé avec succès.";
+    }
+
+    enregistrerUtilisateurs(utilisateurs);
+
+    afficherUtilisateurs();
+    reinitialiserFormulaire();
+});
+
+// =====================================
+// MODIFIER UN UTILISATEUR
+// =====================================
+
+function modifierUtilisateur(id) {
+
+    const utilisateur = lireUtilisateurs().find(u => u.id === id);
+
+    if (!utilisateur) return;
+
+    document.getElementById("userId").value = utilisateur.id;
+    document.getElementById("nom").value = utilisateur.nom;
+    document.getElementById("identifiant").value = utilisateur.identifiant;
+    document.getElementById("fonction").value = utilisateur.fonction;
+    document.getElementById("motDePasse").value = "";
+    document.getElementById("confirmation").value = "";
+
+    document.getElementById("motDePasse").required = false;
+
+    document.getElementById("titreFormulaire").textContent =
+        "✏️ Modifier un compte";
+
+    document.getElementById("boutonEnregistrer").textContent =
+        "ENREGISTRER LES MODIFICATIONS";
+
+    document.getElementById("annulerModification").classList.remove("hidden");
+
+    if (utilisateur.accesTotal) {
+        document.getElementById("zonePermissions").style.display = "none";
+    } else {
+        document.getElementById("zonePermissions").style.display = "block";
+        afficherPermissions(utilisateur.permissions || []);
+    }
+
+    window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+// =====================================
+// SUSPENDRE OU RÉACTIVER
+// =====================================
+
+function changerStatut(id) {
+
+    const utilisateurs = lireUtilisateurs();
+
+    const utilisateur = utilisateurs.find(u => u.id === id);
+
+    if (!utilisateur) return;
+
+    const action = utilisateur.statut === "actif"
+        ? "suspendre"
+        : "réactiver";
+
+    if (!confirm("Voulez-vous vraiment " + action + " ce compte ?")) {
+        return;
+    }
+
+    utilisateur.statut =
+        utilisateur.statut === "actif" ? "suspendu" : "actif";
+
+    enregistrerUtilisateurs(utilisateurs);
+    afficherUtilisateurs();
+}
+
+// =====================================
+// REINITIALISER LE FORMULAIRE
+// =====================================
+
+function reinitialiserFormulaire() {
+
+    document.getElementById("formUtilisateur").reset();
+
+    document.getElementById("userId").value = "";
+
+    document.getElementById("motDePasse").required = true;
+
+    document.getElementById("titreFormulaire").textContent =
+        "➕ Créer un compte utilisateur";
+
+    document.getElementById("boutonEnregistrer").textContent =
+        "CRÉER LE COMPTE";
+
+    document.getElementById("annulerModification").classList.add("hidden");
+
+    document.getElementById("zonePermissions").style.display = "block";
+
+    afficherPermissions([]);
+
+}
+
+function annulerEdition() {
+    reinitialiserFormulaire();
+}
+
+function retourDashboard() {
+    window.location.href = "dashboard.html";
+}
+
+// =====================================
+// INITIALISATION
+// =====================================
+
+afficherPermissions([]);
+afficherUtilisateurs();
+
+</script>
+
+</body>
+</html>

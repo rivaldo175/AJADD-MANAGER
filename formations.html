@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Gestion des formations</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f2f4f8;color:#222;padding:18px}
+.container{max-width:1150px;margin:auto}
+header{background:#102b50;color:white;padding:22px;border-radius:10px;margin-bottom:20px}
+h1{font-size:23px;margin-bottom:8px}
+h2{font-size:19px;margin-bottom:15px;color:#102b50}
+h3{margin:15px 0 10px}
+.panel{background:white;padding:20px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px #00000012}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+textarea{min-height:75px}
+button{padding:11px 15px;border:0;border-radius:6px;cursor:pointer;font-weight:bold;margin:5px 3px}
+.primary{background:#102b50;color:white}
+.gold{background:#d6a52a;color:#222}
+.danger{background:#c62828;color:white}
+.back{background:#ddd;color:#222}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{background:#f5f7fb;padding:16px;border-radius:8px;border-left:4px solid #d6a52a}
+.stat small{display:block;color:#555;margin-bottom:8px}
+.stat strong{font-size:22px;color:#102b50}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:11px;border-bottom:1px solid #ddd;text-align:left;font-size:14px}
+th{background:#102b50;color:white}
+.message{padding:12px;background:#fff4d6;border-radius:6px;margin-top:12px}
+.hidden{display:none}
+.actions{white-space:nowrap}
+.tag{display:inline-block;padding:5px 8px;border-radius:5px;background:#e9eef6;font-size:12px}
+@media(max-width:600px){body{padding:9px}.panel{padding:13px}h1{font-size:20px}}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Module de gestion des formations</p>
+</header>
+
+<div class="panel">
+<button class="back" onclick="location.href='dashboard.html'">← Retour au tableau de bord</button>
+<h2>Tableau de bord des formations</h2>
+<div class="grid">
+<div class="stat"><small>Total des formations</small><strong id="nombreFormations">0</strong></div>
+<div class="stat"><small>Formations en cours</small><strong id="formationsEnCours">0</strong></div>
+<div class="stat"><small>Formations terminées</small><strong id="formationsTerminees">0</strong></div>
+<div class="stat"><small>Total des participants</small><strong id="nombreParticipants">0</strong></div>
+</div>
+</div>
+
+<div class="panel">
+<h2 id="titreFormulaire">1. Créer une formation</h2>
+
+<input type="hidden" id="formationId">
+
+<label>Nom de la formation *</label>
+<input id="nom" placeholder="Ex : Formation en entrepreneuriat">
+
+<label>Thème de la formation</label>
+<input id="theme" placeholder="Thème principal">
+
+<label>Description et objectifs</label>
+<textarea id="description" placeholder="Présentez les objectifs et le contenu de la formation"></textarea>
+
+<div class="grid">
+<div>
+<label>Date de début *</label>
+<input type="date" id="dateDebut">
+</div>
+<div>
+<label>Date de fin *</label>
+<input type="date" id="dateFin">
+</div>
+<div>
+<label>Heure de début</label>
+<input type="time" id="heure">
+</div>
+<div>
+<label>Lieu de la formation *</label>
+<input id="lieu" placeholder="Ex : Lomé, Togo">
+</div>
+</div>
+
+<label>Formateur / Responsable</label>
+<input id="formateur" placeholder="Nom du formateur">
+
+<div class="grid">
+<div>
+<label>Nombre de places disponibles</label>
+<input type="number" id="places" min="0" placeholder="Ex : 50">
+</div>
+<div>
+<label>Frais de participation (F CFA)</label>
+<input type="number" id="frais" min="0" placeholder="Ex : 5000">
+</div>
+</div>
+
+<label>Statut</label>
+<select id="statut">
+<option value="En préparation">En préparation</option>
+<option value="Ouverte aux inscriptions">Ouverte aux inscriptions</option>
+<option value="En cours">En cours</option>
+<option value="Terminée">Terminée</option>
+<option value="Annulée">Annulée</option>
+</select>
+
+<button class="primary" onclick="enregistrerFormation()">Enregistrer la formation</button>
+<button class="back" onclick="viderFormulaire()">Annuler / Nouveau</button>
+</div>
+
+<div class="panel">
+<h2>2. Liste des formations</h2>
+<input id="recherche" placeholder="Rechercher une formation..." oninput="afficherFormations()">
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Formation</th>
+<th>Dates</th>
+<th>Lieu</th>
+<th>Formateur</th>
+<th>Participants</th>
+<th>Statut</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="listeFormations"></tbody>
+</table>
+</div>
+<p id="aucuneFormation" class="message hidden">Aucune formation enregistrée.</p>
+</div>
+
+<div class="panel">
+<h2>3. Gestion des participants et des présences</h2>
+
+<label>Choisir une formation</label>
+<select id="formationParticipants" onchange="afficherParticipants()">
+<option value="">-- Choisir une formation --</option>
+</select>
+
+<div id="zoneParticipants" class="hidden">
+
+<h3>Inscrire un participant</h3>
+
+<div class="grid">
+<div>
+<label>Nom et prénom *</label>
+<input id="participantNom" placeholder="Nom complet">
+</div>
+<div>
+<label>Téléphone</label>
+<input id="participantTelephone" placeholder="Numéro de téléphone">
+</div>
+<div>
+<label>Email</label>
+<input id="participantEmail" type="email" placeholder="Adresse email">
+</div>
+</div>
+
+<label>Organisation / Structure</label>
+<input id="participantOrganisation" placeholder="Nom de l'organisation">
+
+<button class="primary" onclick="ajouterParticipant()">Inscrire le participant</button>
+
+<h3>Liste des participants</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Téléphone</th>
+<th>Organisation</th>
+<th>Présence</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="listeParticipants"></tbody>
+</table>
+</div>
+<p id="aucunParticipant" class="message hidden">Aucun participant inscrit.</p>
+</div>
+</div>
+
+<div class="panel">
+<h2>4. Informations et attestations</h2>
+<p>Le suivi des participants et des présences est disponible dans chaque formation.</p>
+<p>La génération des attestations sera ajoutée dans une prochaine étape.</p>
+</div>
+
+</div>
+
+<script>
+const CLE_FORMATIONS = "ajaddFormations";
+
+let formations = [];
+
+function lireFormations(){
+    try{
+        const donnees = JSON.parse(localStorage.getItem(CLE_FORMATIONS) || "[]");
+        return Array.isArray(donnees) ? donnees : [];
+    }catch(e){
+        return [];
+    }
+}
+
+function sauvegarder(){
+    localStorage.setItem(CLE_FORMATIONS, JSON.stringify(formations));
+}
+
+function identifiant(){
+    return "FOR-" + Date.now() + "-" + Math.random().toString(36).slice(2,6);
+}
+
+function obtenirFormation(id){
+    return formations.find(f => String(f.id) === String(id));
+}
+
+function enregistrerFormation(){
+    const id = document.getElementById("formationId").value;
+    const nom = document.getElementById("nom").value.trim();
+    const dateDebut = document.getElementById("dateDebut").value;
+    const dateFin = document.getElementById("dateFin").value;
+    const lieu = document.getElementById("lieu").value.trim();
+
+    if(!nom || !dateDebut || !dateFin || !lieu){
+        alert("Veuillez remplir le nom, les dates et le lieu de la formation.");
+        return;
+    }
+
+    if(dateFin < dateDebut){
+        alert("La date de fin ne peut pas être antérieure à la date de début.");
+        return;
+    }
+
+    const ancienne = id ? obtenirFormation(id) : null;
+
+    const formation = {
+        id: id || identifiant(),
+        nom: nom,
+        theme: document.getElementById("theme").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        dateDebut: dateDebut,
+        dateFin: dateFin,
+        heure: document.getElementById("heure").value,
+        lieu: lieu,
+        formateur: document.getElementById("formateur").value.trim(),
+        places: Number(document.getElementById("places").value) || 0,
+        frais: Number(document.getElementById("frais").value) || 0,
+        statut: document.getElementById("statut").value,
+        participants: ancienne && Array.isArray(ancienne.participants) ? ancienne.participants : []
+    };
+
+    if(id){
+        const index = formations.findIndex(f => String(f.id) === String(id));
+        if(index !== -1) formations[index] = formation;
+    }else{
+        formations.push(formation);
+    }
+
+    sauvegarder();
+    viderFormulaire();
+    actualiserTout();
+
+    alert("Formation enregistrée avec succès !");
+}
+
+function viderFormulaire(){
+    document.getElementById("formationId").value = "";
+    ["nom","theme","description","dateDebut","dateFin","heure","lieu","formateur","places","frais"].forEach(id=>{
+        document.getElementById(id).value = "";
+    });
+    document.getElementById("statut").value = "En préparation";
+    document.getElementById("titreFormulaire").textContent = "1. Créer une formation";
+}
+
+function modifierFormation(id){
+    const f = obtenirFormation(id);
+    if(!f) return;
+
+    document.getElementById("formationId").value = f.id;
+    document.getElementById("nom").value = f.nom || "";
+    document.getElementById("theme").value = f.theme || "";
+    document.getElementById("description").value = f.description || "";
+    document.getElementById("dateDebut").value = f.dateDebut || "";
+    document.getElementById("dateFin").value = f.dateFin || "";
+    document.getElementById("heure").value = f.heure || "";
+    document.getElementById("lieu").value = f.lieu || "";
+    document.getElementById("formateur").value = f.formateur || "";
+    document.getElementById("places").value = f.places || "";
+    document.getElementById("frais").value = f.frais || "";
+    document.getElementById("statut").value = f.statut || "En préparation";
+    document.getElementById("titreFormulaire").textContent = "Modifier la formation";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function supprimerFormation(id){
+    if(!confirm("Supprimer cette formation et ses inscriptions ?")) return;
+
+    formations = formations.filter(f => String(f.id) !== String(id));
+    sauvegarder();
+    actualiserTout();
+}
+
+function afficherFormations(){
+    const liste = document.getElementById("listeFormations");
+    const recherche = document.getElementById("recherche").value.toLowerCase();
+
+    liste.innerHTML = "";
+
+    const resultat = formations.filter(f =>
+        (f.nom || "").toLowerCase().includes(recherche) ||
+        (f.lieu || "").toLowerCase().includes(recherche) ||
+        (f.formateur || "").toLowerCase().includes(recherche)
+    );
+
+    document.getElementById("aucuneFormation").classList.toggle("hidden", resultat.length !== 0);
+
+    resultat.forEach(f=>{
+        const participants = Array.isArray(f.participants) ? f.participants : [];
+        const tr = document.createElement("tr");
+
+        const valeurs = [
+            f.nom,
+            (f.dateDebut || "") + " au " + (f.dateFin || ""),
+            f.lieu,
+            f.formateur || "-",
+            participants.length,
+            f.statut
+        ];
+
+        valeurs.forEach(v=>{
+            const td = document.createElement("td");
+            td.textContent = v || "-";
+            tr.appendChild(td);
+        });
+
+        const actions = document.createElement("td");
+        actions.className = "actions";
+
+        const modifier = document.createElement("button");
+        modifier.className = "gold";
+        modifier.textContent = "Modifier";
+        modifier.onclick = ()=>modifierFormation(f.id);
+
+        const supprimer = document.createElement("button");
+        supprimer.className = "danger";
+        supprimer.textContent = "Supprimer";
+        supprimer.onclick = ()=>supprimerFormation(f.id);
+
+        actions.append(modifier,supprimer);
+        tr.appendChild(actions);
+        liste.appendChild(tr);
+    });
+}
+
+function actualiserSelect(){
+    const select = document.getElementById("formationParticipants");
+    const ancienneValeur = select.value;
+
+    select.innerHTML = '<option value="">-- Choisir une formation --</option>';
+
+    formations.forEach(f=>{
+        const option = document.createElement("option");
+        option.value = f.id;
+        option.textContent = f.nom;
+        select.appendChild(option);
+    });
+
+    if(formations.some(f=>String(f.id) === String(ancienneValeur))){
+        select.value = ancienneValeur;
+    }
+
+    afficherParticipants();
+}
+
+function ajouterParticipant(){
+    const id = document.getElementById("formationParticipants").value;
+    const f = obtenirFormation(id);
+
+    if(!f) return;
+
+    const nom = document.getElementById("participantNom").value.trim();
+
+    if(!nom){
+        alert("Veuillez saisir le nom du participant.");
+        return;
+    }
+
+    if(!Array.isArray(f.participants)) f.participants = [];
+
+    if(f.places > 0 && f.participants.length >= f.places){
+        alert("Le nombre maximum de places est atteint.");
+        return;
+    }
+
+    f.participants.push({
+        id: identifiant(),
+        nom: nom,
+        telephone: document.getElementById("participantTelephone").value.trim(),
+        email: document.getElementById("participantEmail").value.trim(),
+        organisation: document.getElementById("participantOrganisation").value.trim(),
+        presence: "Non renseignée"
+    });
+
+    sauvegarder();
+
+    document.getElementById("participantNom").value = "";
+    document.getElementById("participantTelephone").value = "";
+    document.getElementById("participantEmail").value = "";
+    document.getElementById("participantOrganisation").value = "";
+
+    actualiserTout();
+    document.getElementById("formationParticipants").value = id;
+    afficherParticipants();
+
+    alert("Participant inscrit avec succès !");
+}
+
+function afficherParticipants(){
+    const id = document.getElementById("formationParticipants").value;
+    const zone = document.getElementById("zoneParticipants");
+    const liste = document.getElementById("listeParticipants");
+
+    liste.innerHTML = "";
+
+    if(!id){
+        zone.classList.add("hidden");
+        return;
+    }
+
+    zone.classList.remove("hidden");
+
+    const f = obtenirFormation(id);
+    if(!f) return;
+
+    if(!Array.isArray(f.participants)) f.participants = [];
+
+    document.getElementById("aucunParticipant").classList.toggle("hidden", f.participants.length !== 0);
+
+    f.participants.forEach(p=>{
+        const tr = document.createElement("tr");
+
+        [p.nom,p.telephone || "-",p.organisation || "-"].forEach(v=>{
+            const td = document.createElement("td");
+            td.textContent = v;
+            tr.appendChild(td);
+        });
+
+        const presenceTd = document.createElement("td");
+        const select = document.createElement("select");
+
+        ["Non renseignée","Présent","Absent"].forEach(val=>{
+            const option = document.createElement("option");
+            option.value = val;
+            option.textContent = val;
+            select.appendChild(option);
+        });
+
+        select.value = p.presence || "Non renseignée";
+        select.onchange = ()=>{
+            p.presence = select.value;
+            sauvegarder();
+            actualiserStatistiques();
+        };
+
+        presenceTd.appendChild(select);
+        tr.appendChild(presenceTd);
+
+        const actionTd = document.createElement("td");
+        const bouton = document.createElement("button");
+        bouton.className = "danger";
+        bouton.textContent = "Retirer";
+        bouton.onclick = ()=>supprimerParticipant(id,p.id);
+
+        actionTd.appendChild(bouton);
+        tr.appendChild(actionTd);
+
+        liste.appendChild(tr);
+    });
+}
+
+function supprimerParticipant(formationId,participantId){
+    if(!confirm("Retirer ce participant de la formation ?")) return;
+
+    const f = obtenirFormation(formationId);
+    if(!f) return;
+
+    f.participants = (f.participants || []).filter(p=>p.id !== participantId);
+    sauvegarder();
+    actualiserTout();
+    document.getElementById("formationParticipants").value = formationId;
+    afficherParticipants();
+}
+
+function actualiserStatistiques(){
+    const participants = formations.reduce((total,f)=>{
+        return total + (Array.isArray(f.participants) ? f.participants.length : 0);
+    },0);
+
+    document.getElementById("nombreFormations").textContent = formations.length;
+    document.getElementById("formationsEnCours").textContent =
+        formations.filter(f=>f.statut === "En cours").length;
+    document.getElementById("formationsTerminees").textContent =
+        formations.filter(f=>f.statut === "Terminée").length;
+    document.getElementById("nombreParticipants").textContent = participants;
+}
+
+function actualiserTout(){
+    afficherFormations();
+    actualiserSelect();
+    actualiserStatistiques();
+}
+
+function initialiser(){
+    formations = lireFormations();
+    actualiserTout();
+}
+
+initialiser();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

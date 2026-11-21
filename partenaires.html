@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Partenaires et Sponsoring</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f2f4f8;color:#222;padding:18px}
+.container{max-width:1200px;margin:auto}
+header{background:#102b50;color:white;padding:22px;border-radius:10px;margin-bottom:20px}
+h1{font-size:23px;margin-bottom:8px}
+h2{font-size:19px;color:#102b50;margin-bottom:15px}
+h3{margin:16px 0 10px}
+.panel{background:white;padding:20px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px #00000012}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+textarea{min-height:70px}
+button{padding:10px 14px;border:0;border-radius:6px;cursor:pointer;font-weight:bold;margin:5px 3px}
+.primary{background:#102b50;color:white}
+.gold{background:#d6a52a;color:#222}
+.danger{background:#c62828;color:white}
+.back{background:#ddd;color:#222}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.stat{background:#f5f7fb;padding:16px;border-radius:8px;border-left:4px solid #d6a52a}
+.stat small{display:block;color:#555;margin-bottom:8px}
+.stat strong{font-size:19px;color:#102b50}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;font-size:14px}
+th{background:#102b50;color:white}
+.message{padding:12px;background:#fff4d6;border-radius:6px;margin-top:12px}
+.hidden{display:none}
+.actions{white-space:nowrap}
+@media(max-width:600px){body{padding:9px}.panel{padding:13px}h1{font-size:20px}}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Gestion des partenaires, sponsors et conventions</p>
+</header>
+
+<div class="panel">
+<button class="back" onclick="location.href='dashboard.html'">← Retour au tableau de bord</button>
+<h2>Tableau de bord des partenariats</h2>
+
+<div class="grid">
+<div class="stat"><small>Total des partenaires</small><strong id="nbPartenaires">0</strong></div>
+<div class="stat"><small>Conventions enregistrées</small><strong id="nbConventions">0</strong></div>
+<div class="stat"><small>Contributions financières</small><strong id="totalFinancier">0 F CFA</strong></div>
+<div class="stat"><small>Valeur des dons en nature</small><strong id="totalNature">0 F CFA</strong></div>
+</div>
+</div>
+
+<div class="panel">
+<h2>1. Enregistrer un partenaire ou sponsor</h2>
+
+<input type="hidden" id="partenaireId">
+
+<label>Nom du partenaire / sponsor *</label>
+<input id="nomPartenaire" placeholder="Nom de l'entreprise, institution ou personne">
+
+<div class="grid">
+<div>
+<label>Type de partenaire</label>
+<select id="typePartenaire">
+<option>Entreprise privée</option>
+<option>Institution publique</option>
+<option>Association / ONG</option>
+<option>Organisation internationale</option>
+<option>Particulier</option>
+<option>Partenaire média</option>
+<option>Autre</option>
+</select>
+</div>
+<div>
+<label>Catégorie de partenariat</label>
+<select id="categoriePartenaire">
+<option>Sponsor officiel</option>
+<option>Partenaire financier</option>
+<option>Partenaire technique</option>
+<option>Partenaire média</option>
+<option>Partenaire institutionnel</option>
+<option>Partenaire en nature</option>
+<option>Autre</option>
+</select>
+</div>
+</div>
+
+<div class="grid">
+<div>
+<label>Nom du responsable</label>
+<input id="responsablePartenaire" placeholder="Nom et prénom">
+</div>
+<div>
+<label>Téléphone</label>
+<input id="telephonePartenaire" placeholder="Numéro de téléphone">
+</div>
+<div>
+<label>Email</label>
+<input id="emailPartenaire" type="email" placeholder="Adresse email">
+</div>
+</div>
+
+<label>Adresse / Localisation</label>
+<input id="adressePartenaire" placeholder="Ville, quartier, adresse">
+
+<label>Site web</label>
+<input id="sitePartenaire" placeholder="Site internet">
+
+<label>Observations</label>
+<textarea id="observationPartenaire" placeholder="Informations complémentaires"></textarea>
+
+<button class="primary" onclick="enregistrerPartenaire()">Enregistrer le partenaire</button>
+<button class="back" onclick="viderPartenaire()">Nouveau / Annuler</button>
+</div>
+
+<div class="panel">
+<h2>2. Liste des partenaires</h2>
+<input id="recherchePartenaire" placeholder="Rechercher un partenaire..." oninput="afficherPartenaires()">
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Partenaire</th>
+<th>Type</th>
+<th>Catégorie</th>
+<th>Responsable</th>
+<th>Téléphone</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="listePartenaires"></tbody>
+</table>
+</div>
+<p id="aucunPartenaire" class="message hidden">Aucun partenaire enregistré.</p>
+</div>
+
+<div class="panel">
+<h2>3. Enregistrer une convention de partenariat</h2>
+
+<label>Partenaire concerné *</label>
+<select id="conventionPartenaire">
+<option value="">-- Choisir un partenaire --</option>
+</select>
+
+<label>Objet de la convention *</label>
+<input id="objetConvention" placeholder="Ex : Sponsoring d'un événement AJADD">
+
+<div class="grid">
+<div>
+<label>Date de signature</label>
+<input type="date" id="dateSignature">
+</div>
+<div>
+<label>Date de début</label>
+<input type="date" id="dateDebut">
+</div>
+<div>
+<label>Date de fin / renouvellement</label>
+<input type="date" id="dateFin">
+</div>
+</div>
+
+<label>Engagements du partenaire</label>
+<textarea id="engagementPartenaire" placeholder="Décrire les engagements du partenaire"></textarea>
+
+<label>Engagements d'AJADD-TOGO</label>
+<textarea id="engagementAJADD" placeholder="Décrire les engagements de l'association"></textarea>
+
+<label>Statut de la convention</label>
+<select id="statutConvention">
+<option>En négociation</option>
+<option>Signée</option>
+<option>En cours</option>
+<option>Terminée</option>
+<option>Résiliée</option>
+</select>
+
+<button class="primary" onclick="enregistrerConvention()">Enregistrer la convention</button>
+
+<h3>Historique des conventions</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Partenaire</th>
+<th>Objet</th>
+<th>Signature</th>
+<th>Date de fin</th>
+<th>Statut</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="listeConventions"></tbody>
+</table>
+</div>
+<p id="aucuneConvention" class="message hidden">Aucune convention enregistrée.</p>
+</div>
+
+<div class="panel">
+<h2>4. Enregistrer une contribution</h2>
+
+<label>Partenaire concerné *</label>
+<select id="contributionPartenaire">
+<option value="">-- Choisir un partenaire --</option>
+</select>
+
+<div class="grid">
+<div>
+<label>Type de contribution</label>
+<select id="typeContribution">
+<option value="Financière">Contribution financière</option>
+<option value="Nature">Don en nature</option>
+</select>
+</div>
+<div>
+<label>Montant ou valeur estimée (F CFA) *</label>
+<input type="number" id="montantContribution" min="1" placeholder="Ex : 100000">
+</div>
+<div>
+<label>Date de réception *</label>
+<input type="date" id="dateContribution">
+</div>
+</div>
+
+<label>Description de la contribution *</label>
+<textarea id="descriptionContribution" placeholder="Ex : Versement financier, fourniture de matériel, location de salle..."></textarea>
+
+<label>Référence / Justificatif</label>
+<input id="referenceContribution" placeholder="Référence de reçu, document ou transaction">
+
+<button class="primary" onclick="enregistrerContribution()">Enregistrer la contribution</button>
+
+<h3>Historique des contributions</h3>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Partenaire</th>
+<th>Type</th>
+<th>Description</th>
+<th>Valeur</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="listeContributions"></tbody>
+</table>
+</div>
+<p id="aucuneContribution" class="message hidden">Aucune contribution enregistrée.</p>
+</div>
+
+</div>
+
+<script>
+const CLE_PARTENAIRES = "ajaddPartenaires";
+
+let donnees = {
+    partenaires: [],
+    conventions: [],
+    contributions: []
+};
+
+function genererId(){
+    return "PART-" + Date.now() + "-" + Math.random().toString(36).slice(2,7);
+}
+
+function fcfa(valeur){
+    return new Intl.NumberFormat("fr-FR").format(Number(valeur)||0)+" F CFA";
+}
+
+function chargerDonnees(){
+    try{
+        const data = JSON.parse(localStorage.getItem(CLE_PARTENAIRES) || "{}");
+        donnees = {
+            partenaires: Array.isArray(data.partenaires) ? data.partenaires : [],
+            conventions: Array.isArray(data.conventions) ? data.conventions : [],
+            contributions: Array.isArray(data.contributions) ? data.contributions : []
+        };
+    }catch(e){
+        donnees = {partenaires:[],conventions:[],contributions:[]};
+    }
+}
+
+function sauvegarder(){
+    localStorage.setItem(CLE_PARTENAIRES,JSON.stringify(donnees));
+}
+
+function obtenirPartenaire(id){
+    return donnees.partenaires.find(p=>p.id===id);
+}
+
+function nomPartenaire(id){
+    const p=obtenirPartenaire(id);
+    return p ? p.nom : "Partenaire inconnu";
+}
+
+function enregistrerPartenaire(){
+    const id=document.getElementById("partenaireId").value;
+    const nom=document.getElementById("nomPartenaire").value.trim();
+
+    if(!nom){
+        alert("Veuillez saisir le nom du partenaire.");
+        return;
+    }
+
+    const partenaire={
+        id:id || genererId(),
+        nom,
+        type:document.getElementById("typePartenaire").value,
+        categorie:document.getElementById("categoriePartenaire").value,
+        responsable:document.getElementById("responsablePartenaire").value.trim(),
+        telephone:document.getElementById("telephonePartenaire").value.trim(),
+        email:document.getElementById("emailPartenaire").value.trim(),
+        adresse:document.getElementById("adressePartenaire").value.trim(),
+        site:document.getElementById("sitePartenaire").value.trim(),
+        observations:document.getElementById("observationPartenaire").value.trim()
+    };
+
+    if(id){
+        const index=donnees.partenaires.findIndex(p=>p.id===id);
+        if(index!==-1) donnees.partenaires[index]=partenaire;
+    }else{
+        donnees.partenaires.push(partenaire);
+    }
+
+    sauvegarder();
+    viderPartenaire();
+    actualiserTout();
+    alert("Partenaire enregistré avec succès !");
+}
+
+function viderPartenaire(){
+    document.getElementById("partenaireId").value="";
+    ["nomPartenaire","responsablePartenaire","telephonePartenaire","emailPartenaire","adressePartenaire","sitePartenaire","observationPartenaire"].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+    document.getElementById("typePartenaire").selectedIndex=0;
+    document.getElementById("categoriePartenaire").selectedIndex=0;
+}
+
+function modifierPartenaire(id){
+    const p=obtenirPartenaire(id);
+    if(!p)return;
+
+    document.getElementById("partenaireId").value=p.id;
+    document.getElementById("nomPartenaire").value=p.nom;
+    document.getElementById("typePartenaire").value=p.type;
+    document.getElementById("categoriePartenaire").value=p.categorie;
+    document.getElementById("responsablePartenaire").value=p.responsable||"";
+    document.getElementById("telephonePartenaire").value=p.telephone||"";
+    document.getElementById("emailPartenaire").value=p.email||"";
+    document.getElementById("adressePartenaire").value=p.adresse||"";
+    document.getElementById("sitePartenaire").value=p.site||"";
+    document.getElementById("observationPartenaire").value=p.observations||"";
+
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function supprimerPartenaire(id){
+    const lie = donnees.conventions.some(c=>c.partenaireId===id) ||
+                donnees.contributions.some(c=>c.partenaireId===id);
+
+    if(lie){
+        alert("Ce partenaire possède des conventions ou des contributions. Conserve son dossier pour préserver l'historique.");
+        return;
+    }
+
+    if(!confirm("Supprimer ce partenaire ?"))return;
+
+    donnees.partenaires=donnees.partenaires.filter(p=>p.id!==id);
+    sauvegarder();
+    actualiserTout();
+}
+
+function afficherPartenaires(){
+    const liste=document.getElementById("listePartenaires");
+    const recherche=document.getElementById("recherchePartenaire").value.toLowerCase();
+    liste.innerHTML="";
+
+    const resultat=donnees.partenaires.filter(p=>
+        (p.nom||"").toLowerCase().includes(recherche) ||
+        (p.type||"").toLowerCase().includes(recherche) ||
+        (p.categorie||"").toLowerCase().includes(recherche)
+    );
+
+    document.getElementById("aucunPartenaire").classList.toggle("hidden",resultat.length!==0);
+
+    resultat.forEach(p=>{
+        const tr=document.createElement("tr");
+
+        [p.nom,p.type,p.categorie,p.responsable||"-",p.telephone||"-"].forEach(v=>{
+            const td=document.createElement("td");
+            td.textContent=v;
+            tr.appendChild(td);
+        });
+
+        const actions=document.createElement("td");
+        const modifier=document.createElement("button");
+        modifier.className="gold";
+        modifier.textContent="Modifier";
+        modifier.onclick=()=>modifierPartenaire(p.id);
+
+        const supprimer=document.createElement("button");
+        supprimer.className="danger";
+        supprimer.textContent="Supprimer";
+        supprimer.onclick=()=>supprimerPartenaire(p.id);
+
+        actions.append(modifier,supprimer);
+        tr.appendChild(actions);
+        liste.appendChild(tr);
+    });
+}
+
+function actualiserSelects(){
+    ["conventionPartenaire","contributionPartenaire"].forEach(id=>{
+        const select=document.getElementById(id);
+        const ancienne=select.value;
+        select.innerHTML='<option value="">-- Choisir un partenaire --</option>';
+
+        donnees.partenaires.forEach(p=>{
+            const option=document.createElement("option");
+            option.value=p.id;
+            option.textContent=p.nom;
+            select.appendChild(option);
+        });
+
+        if(donnees.partenaires.some(p=>p.id===ancienne)){
+            select.value=ancienne;
+        }
+    });
+}
+
+function enregistrerConvention(){
+    const partenaireId=document.getElementById("conventionPartenaire").value;
+    const objet=document.getElementById("objetConvention").value.trim();
+
+    if(!partenaireId || !objet){
+        alert("Choisissez un partenaire et saisissez l'objet de la convention.");
+        return;
+    }
+
+    const debut=document.getElementById("dateDebut").value;
+    const fin=document.getElementById("dateFin").value;
+
+    if(debut && fin && fin<debut){
+        alert("La date de fin ne peut pas précéder la date de début.");
+        return;
+    }
+
+    donnees.conventions.push({
+        id:genererId(),
+        partenaireId,
+        objet,
+        signature:document.getElementById("dateSignature").value,
+        debut,
+        fin,
+        engagementPartenaire:document.getElementById("engagementPartenaire").value.trim(),
+        engagementAJADD:document.getElementById("engagementAJADD").value.trim(),
+        statut:document.getElementById("statutConvention").value
+    });
+
+    sauvegarder();
+
+    ["objetConvention","dateSignature","dateDebut","dateFin","engagementPartenaire","engagementAJADD"].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+
+    actualiserTout();
+    alert("Convention enregistrée avec succès !");
+}
+
+function afficherConventions(){
+    const liste=document.getElementById("listeConventions");
+    liste.innerHTML="";
+
+    document.getElementById("aucuneConvention").classList.toggle("hidden",donnees.conventions.length!==0);
+
+    donnees.conventions.slice().reverse().forEach(c=>{
+        const tr=document.createElement("tr");
+        [nomPartenaire(c.partenaireId),c.objet,c.signature||"-",c.fin||"-",c.statut].forEach(v=>{
+            const td=document.createElement("td");
+            td.textContent=v;
+            tr.appendChild(td);
+        });
+
+        const td=document.createElement("td");
+        const btn=document.createElement("button");
+        btn.className="danger";
+        btn.textContent="Supprimer";
+        btn.onclick=()=>{
+            if(!confirm("Supprimer cette convention ?"))return;
+            donnees.conventions=donnees.conventions.filter(x=>x.id!==c.id);
+            sauvegarder();
+            actualiserTout();
+        };
+        td.appendChild(btn);
+        tr.appendChild(td);
+        liste.appendChild(tr);
+    });
+}
+
+function enregistrerContribution(){
+    const partenaireId=document.getElementById("contributionPartenaire").value;
+    const montant=document.getElementById("montantContribution").value;
+    const date=document.getElementById("dateContribution").value;
+    const description=document.getElementById("descriptionContribution").value.trim();
+
+    if(!partenaireId || montant==="" || !Number.isFinite(Number(montant)) ||
+       Number(montant)<=0 || !date || !description){
+        alert("Veuillez remplir le partenaire, la valeur, la date et la description.");
+        return;
+    }
+
+    donnees.contributions.push({
+        id:genererId(),
+        partenaireId,
+        type:document.getElementById("typeContribution").value,
+        montant:Number(montant),
+        date,
+        description,
+        reference:document.getElementById("referenceContribution").value.trim()
+    });
+
+    sauvegarder();
+
+    ["montantContribution","dateContribution","descriptionContribution","referenceContribution"].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+
+    actualiserTout();
+    alert("Contribution enregistrée avec succès !");
+}
+
+function afficherContributions(){
+    const liste=document.getElementById("listeContributions");
+    liste.innerHTML="";
+
+    document.getElementById("aucuneContribution").classList.toggle("hidden",donnees.contributions.length!==0);
+
+    donnees.contributions.slice().reverse().forEach(c=>{
+        const tr=document.createElement("tr");
+        [c.date,nomPartenaire(c.partenaireId),c.type,c.description,fcfa(c.montant)].forEach(v=>{
+            const td=document.createElement("td");
+            td.textContent=v;
+            tr.appendChild(td);
+        });
+
+        const td=document.createElement("td");
+        const btn=document.createElement("button");
+        btn.className="danger";
+        btn.textContent="Supprimer";
+        btn.onclick=()=>{
+            if(!confirm("Supprimer cette contribution ?"))return;
+            donnees.contributions=donnees.contributions.filter(x=>x.id!==c.id);
+            sauvegarder();
+            actualiserTout();
+        };
+        td.appendChild(btn);
+        tr.appendChild(td);
+        liste.appendChild(tr);
+    });
+}
+
+function actualiserStatistiques(){
+    const financier=donnees.contributions
+        .filter(c=>c.type==="Financière")
+        .reduce((s,c)=>s+Number(c.montant||0),0);
+
+    const nature=donnees.contributions
+        .filter(c=>c.type==="Nature")
+        .reduce((s,c)=>s+Number(c.montant||0),0);
+
+    document.getElementById("nbPartenaires").textContent=donnees.partenaires.length;
+    document.getElementById("nbConventions").textContent=donnees.conventions.length;
+    document.getElementById("totalFinancier").textContent=fcfa(financier);
+    document.getElementById("totalNature").textContent=fcfa(nature);
+}
+
+function actualiserTout(){
+    afficherPartenaires();
+    actualiserSelects();
+    afficherConventions();
+    afficherContributions();
+    actualiserStatistiques();
+}
+
+function initialiser(){
+    chargerDonnees();
+    actualiserTout();
+}
+
+initialiser();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

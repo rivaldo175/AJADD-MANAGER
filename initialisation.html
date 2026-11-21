@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialisation | AJADD MANAGER</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #06172f, #103c32);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 460px;
+            padding: 32px;
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #082b4c;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #b58b25;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            color: #183653;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #b58b25;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 22px;
+            background: #082b4c;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #b58b25;
+        }
+
+        .message {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .retour {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #087443;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .role {
+            background: #f5f1e6;
+            color: #80621c;
+            padding: 12px;
+            border-radius: 7px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🏛️ AJADD MANAGER</h1>
+
+    <p class="subtitle">
+        INITIALISATION DU COMPTE PRINCIPAL
+    </p>
+
+    <p class="description">
+        Création du premier compte administrateur
+        de la plateforme AJADD-TOGO.
+    </p>
+
+    <div class="role">
+        👑 PDG / PRÉSIDENT — ADMINISTRATEUR PRINCIPAL
+    </div>
+
+    <form id="formPDG">
+
+        <label for="nom">Nom et prénom du Président</label>
+        <input
+            type="text"
+            id="nom"
+            placeholder="Entrez le nom complet"
+            required
+        >
+
+        <label for="identifiant">Identifiant</label>
+        <input
+            type="text"
+            id="identifiant"
+            placeholder="Choisissez votre identifiant"
+            required
+        >
+
+        <label for="motDePasse">Mot de passe</label>
+        <input
+            type="password"
+            id="motDePasse"
+            placeholder="Minimum 8 caractères"
+            minlength="8"
+            required
+        >
+
+        <label for="confirmation">Confirmer le mot de passe</label>
+        <input
+            type="password"
+            id="confirmation"
+            placeholder="Confirmez votre mot de passe"
+            minlength="8"
+            required
+        >
+
+        <button type="submit">
+            CRÉER LE COMPTE PDG
+        </button>
+
+        <p id="message" class="message"></p>
+
+    </form>
+
+    <a href="index.html" class="retour">
+        Retour à la connexion
+    </a>
+
+</div>
+
+<script>
+
+document.getElementById("formPDG").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const nom = document.getElementById("nom").value.trim();
+    const identifiant = document.getElementById("identifiant").value.trim();
+    const motDePasse = document.getElementById("motDePasse").value;
+    const confirmation = document.getElementById("confirmation").value;
+    const message = document.getElementById("message");
+
+    // Vérifier si le compte principal existe déjà
+    if (localStorage.getItem("ajaddPDGInitialise") === "oui") {
+        message.style.color = "red";
+        message.textContent = "Le compte PDG a déjà été initialisé.";
+        return;
+    }
+
+    // Vérifier les champs
+    if (!nom || !identifiant || !motDePasse) {
+        message.style.color = "red";
+        message.textContent = "Veuillez remplir tous les champs.";
+        return;
+    }
+
+    if (motDePasse.length < 8) {
+        message.style.color = "red";
+        message.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+        return;
+    }
+
+    if (motDePasse !== confirmation) {
+        message.style.color = "red";
+        message.textContent = "Les mots de passe ne correspondent pas.";
+        return;
+    }
+
+    // Créer le compte principal
+    const comptePDG = {
+        id: "PDG-001",
+        nom: nom,
+        identifiant: identifiant,
+        motDePasse: motDePasse,
+        fonction: "PDG / Président",
+        role: "administrateur_principal",
+        statut: "actif",
+        accesTotal: true,
+        gestionUtilisateurs: true,
+        dateCreation: new Date().toISOString()
+    };
+
+    // Enregistrer le compte
+    localStorage.setItem(
+        "ajaddUtilisateurs",
+        JSON.stringify([comptePDG])
+    );
+
+    localStorage.setItem("ajaddPDGInitialise", "oui");
+
+    message.style.color = "green";
+    message.textContent = "Compte PDG créé avec succès ! Redirection...";
+
+    document.querySelector("button").disabled = true;
+
+    setTimeout(function() {
+        window.location.href = "index.html";
+    }, 1800);
+
+});
+
+</script>
+
+</body>
+</html>

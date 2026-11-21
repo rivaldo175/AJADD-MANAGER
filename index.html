@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | AJADD MANAGER</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #06172f, #103c32);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            width: 100%;
+            max-width: 430px;
+            padding: 35px 28px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            width: 115px;
+            height: 115px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #082b4c;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #b58b25;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 25px;
+        }
+
+        .description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #183653;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #c59b35;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 7px;
+            background: #082b4c;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .login-button:hover {
+            background: #b58b25;
+        }
+
+        .footer {
+            margin-top: 25px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .message {
+            margin-top: 15px;
+            color: #b3261e;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <img
+            src="images/logo-ajadd.png"
+            alt="Logo AJADD-TOGO"
+            class="logo"
+            onerror="this.style.display='none'"
+        >
+
+        <h1>AJADD MANAGER</h1>
+
+        <p class="subtitle">
+            AMICALE DES JEUNES AMBITIEUX ET DYNAMIQUES POUR LE DÉVELOPPEMENT
+        </p>
+
+        <p class="description">
+            Bienvenue sur la plateforme officielle de gestion d'AJADD-TOGO.
+            Veuillez vous connecter.
+        </p>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+                <label for="identifiant">Identifiant</label>
+                <input
+                    type="text"
+                    id="identifiant"
+                    placeholder="Votre identifiant"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Votre mot de passe"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="login-button">
+                SE CONNECTER
+            </button>
+
+            <p id="message" class="message"></p>
+
+        </form>
+
+        <div class="footer">
+            AJADD-TOGO © 2026<br>
+            Ensemble pour un avenir meilleur
+        </div>
+
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const identifiant = document.getElementById("identifiant").value.trim();
+            const motDePasse = document.getElementById("password").value;
+            const message = document.getElementById("message");
+
+            let utilisateurs = [];
+
+            try {
+                utilisateurs = JSON.parse(
+                    localStorage.getItem("ajaddUtilisateurs") || "[]"
+                );
+            } catch (erreur) {
+                utilisateurs = [];
+            }
+
+            const utilisateur = utilisateurs.find(function(compte) {
+                return (
+                    compte.identifiant === identifiant &&
+                    compte.motDePasse === motDePasse &&
+                    compte.statut === "actif"
+                );
+            });
+
+            if (!utilisateur) {
+                message.textContent = "Identifiant ou mot de passe incorrect, ou compte inactif.";
+                return;
+            }
+
+            // Enregistrer la session locale
+            const session = {
+                identifiant: utilisateur.identifiant,
+                nom: utilisateur.nom,
+                fonction: utilisateur.fonction,
+                role: utilisateur.role,
+                dateConnexion: new Date().toISOString()
+            };
+
+            sessionStorage.setItem(
+                "ajaddSession",
+                JSON.stringify(session)
+            );
+
+            message.style.color = "green";
+            message.textContent = "Connexion réussie. Bienvenue !";
+
+            setTimeout(function() {
+                window.location.href = "dashboard.html";
+            }, 800);
+
+        });
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@29.0.0"></script>
+<script src="appwrite.js"></script>
+</body>
+</html>

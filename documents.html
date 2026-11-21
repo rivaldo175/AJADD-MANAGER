@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Documents et archives</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f5f9;color:#202938}
+header{background:#102c50;color:white;padding:22px}
+header h1{font-size:23px;margin-bottom:7px}
+header p{color:#d7e3f3}
+main{max-width:1200px;margin:auto;padding:20px}
+.back{display:inline-block;margin-bottom:18px;color:#174b83;text-decoration:none;font-weight:bold}
+h2{font-size:19px;margin:22px 0 13px}
+.panel,.stat{background:white;padding:18px;border-radius:12px;box-shadow:0 2px 8px #0000000c}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px}
+.stat p{font-size:13px;color:#64748b;margin-bottom:9px}
+.stat strong{font-size:23px}
+.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+label{display:block;font-size:13px;font-weight:bold;margin:12px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd4df;border-radius:7px;font-size:14px;background:white}
+textarea{min-height:65px}
+button{border:0;border-radius:7px;padding:11px 15px;background:#174b83;color:white;font-weight:bold;cursor:pointer;margin-top:12px}
+button:hover{opacity:.9}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:750px}
+th,td{padding:12px 9px;border-bottom:1px solid #e5eaf0;text-align:left;font-size:13px}
+th{background:#f0f4f9}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input{max-width:350px}
+.action{display:flex;gap:5px}
+.action button{margin:0;padding:7px 9px;font-size:12px}
+.delete{background:#bd3535}
+.open{background:#16834a}
+small{color:#64748b}
+.notice{background:#fff7df;padding:13px;border-radius:8px;color:#765515;font-size:13px;margin-top:16px}
+footer{text-align:center;color:#718096;padding:25px;font-size:12px}
+@media(max-width:600px){main{padding:12px}header{padding:18px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Gestion des documents et archives</p>
+</header>
+
+<main>
+<a class="back" href="dashboard.html">← Retour au tableau de bord</a>
+
+<h2>Tableau de bord documentaire</h2>
+<div class="stats">
+<div class="stat"><p>DOCUMENTS ENREGISTRÉS</p><strong id="total">0</strong></div>
+<div class="stat"><p>COURRIERS ENTRANTS</p><strong id="entrants">0</strong></div>
+<div class="stat"><p>COURRIERS SORTANTS</p><strong id="sortants">0</strong></div>
+<div class="stat"><p>ARCHIVES</p><strong id="archives">0</strong></div>
+</div>
+
+<h2>Enregistrer un document</h2>
+<div class="panel">
+<form id="formDocument">
+<div class="forms">
+<div>
+<label>Titre du document *</label>
+<input id="titre" required placeholder="Ex : Procès-verbal de réunion">
+</div>
+<div>
+<label>Catégorie *</label>
+<select id="categorie" required>
+<option value="">Choisir une catégorie</option>
+<option>Document administratif</option>
+<option>Statuts et règlement intérieur</option>
+<option>Procès-verbal</option>
+<option>Rapport d'activité</option>
+<option>Rapport financier</option>
+<option>Courrier entrant</option>
+<option>Courrier sortant</option>
+<option>Contrat et convention</option>
+<option>Document événementiel</option>
+<option>Document de formation</option>
+<option>Autre</option>
+</select>
+</div>
+<div>
+<label>Service concerné</label>
+<select id="service">
+<option>Direction générale</option>
+<option>Bureau exécutif national</option>
+<option>Conseil d'administration</option>
+<option>Département</option>
+<option>Bureau régional</option>
+<option>Secrétariat</option>
+<option>Trésorerie</option>
+<option>Autre</option>
+</select>
+</div>
+<div>
+<label>Date du document *</label>
+<input id="dateDocument" type="date" required>
+</div>
+<div>
+<label>Référence du document</label>
+<input id="reference" placeholder="Ex : AJADD/SG/001/2026">
+</div>
+<div>
+<label>Statut</label>
+<select id="statut">
+<option>Actif</option>
+<option>Archivé</option>
+<option>En attente</option>
+</select>
+</div>
+</div>
+<label>Description / Observations</label>
+<textarea id="description" placeholder="Informations complémentaires"></textarea>
+
+<label>Fichier à joindre</label>
+<input id="fichier" type="file">
+<small>Formats courants acceptés : PDF, Word, Excel et images. Taille maximale : 3 Mo.</small>
+<br>
+<button type="submit">Enregistrer le document</button>
+</form>
+</div>
+
+<h2>Répertoire des documents</h2>
+<div class="panel">
+<div class="tools">
+<input id="recherche" placeholder="Rechercher par titre, référence...">
+<select id="filtreCategorie">
+<option value="">Toutes les catégories</option>
+<option>Document administratif</option>
+<option>Statuts et règlement intérieur</option>
+<option>Procès-verbal</option>
+<option>Rapport d'activité</option>
+<option>Rapport financier</option>
+<option>Courrier entrant</option>
+<option>Courrier sortant</option>
+<option>Contrat et convention</option>
+<option>Document événementiel</option>
+<option>Document de formation</option>
+<option>Autre</option>
+</select>
+<select id="filtreStatut">
+<option value="">Tous les statuts</option>
+<option>Actif</option>
+<option>Archivé</option>
+<option>En attente</option>
+</select>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Date</th><th>Titre</th><th>Catégorie</th><th>Service</th><th>Référence</th><th>Statut</th><th>Fichier</th><th>Actions</th>
+</tr>
+</thead>
+<tbody id="listeDocuments"></tbody>
+</table>
+</div>
+<p id="vide" style="padding:15px;color:#64748b;display:none">Aucun document trouvé.</p>
+</div>
+
+<div class="notice">
+Les fichiers joints sont conservés dans le stockage local du navigateur. Cette première version est destinée à un usage sur le même ordinateur et navigateur. Télécharge les documents importants et conserve des copies de sauvegarde.
+</div>
+</main>
+
+<footer>AJADD-TOGO — Amical des Jeunes Ambitieux et Dynamiques pour le Développement</footer>
+
+<script>
+const CLE_DOCUMENTS="ajaddDocuments";
+const MAX_TAILLE=3*1024*1024;
+
+function lireDocuments(){
+try{
+const d=JSON.parse(localStorage.getItem(CLE_DOCUMENTS));
+return Array.isArray(d)?d:[];
+}catch(e){return [];}
+}
+
+let documents=lireDocuments();
+
+function sauvegarder(){
+try{
+localStorage.setItem(CLE_DOCUMENTS,JSON.stringify(documents));
+return true;
+}catch(e){
+alert("Stockage insuffisant. Réduis la taille du fichier joint ou conserve une copie externe.");
+return false;
+}
+}
+
+function echapper(v){
+return String(v??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+})[c]);
+}
+
+function afficher(){
+document.getElementById("total").textContent=documents.length;
+document.getElementById("entrants").textContent=documents.filter(d=>d.categorie==="Courrier entrant").length;
+document.getElementById("sortants").textContent=documents.filter(d=>d.categorie==="Courrier sortant").length;
+document.getElementById("archives").textContent=documents.filter(d=>d.statut==="Archivé").length;
+
+const recherche=document.getElementById("recherche").value.toLowerCase();
+const categorie=document.getElementById("filtreCategorie").value;
+const statut=document.getElementById("filtreStatut").value;
+
+const resultat=documents.filter(d=>{
+const texte=[d.titre,d.reference,d.categorie,d.service,d.description].join(" ").toLowerCase();
+return texte.includes(recherche)&&(!categorie||d.categorie===categorie)&&(!statut||d.statut===statut);
+}).slice().reverse();
+
+document.getElementById("vide").style.display=resultat.length?"none":"block";
+
+document.getElementById("listeDocuments").innerHTML=resultat.map(d=>`
+<tr>
+<td>${echapper(d.date)}</td>
+<td>${echapper(d.titre)}</td>
+<td>${echapper(d.categorie)}</td>
+<td>${echapper(d.service)}</td>
+<td>${echapper(d.reference||"—")}</td>
+<td>${echapper(d.statut)}</td>
+<td>${d.fichier?echapper(d.fichier.nom):"Aucun fichier"}</td>
+<td>
+<div class="action">
+${d.fichier?`<button class="open" onclick="telecharger('${d.id}')">Ouvrir</button>`:""}
+<button class="delete" onclick="supprimer('${d.id}')">Supprimer</button>
+</div>
+</td>
+</tr>`).join("");
+}
+
+document.getElementById("formDocument").addEventListener("submit",function(e){
+e.preventDefault();
+
+const champ=document.getElementById("fichier");
+const fichier=champ.files[0];
+
+if(fichier&&fichier.size>MAX_TAILLE){
+alert("Le fichier dépasse la limite de 3 Mo.");
+return;
+}
+
+const enregistrer=(contenu)=>{
+const doc={
+id:"DOC-"+Date.now(),
+titre:document.getElementById("titre").value.trim(),
+categorie:document.getElementById("categorie").value,
+service:document.getElementById("service").value,
+date:document.getElementById("dateDocument").value,
+reference:document.getElementById("reference").value.trim(),
+statut:document.getElementById("statut").value,
+description:document.getElementById("description").value.trim(),
+fichier:contenu
+};
+
+documents.push(doc);
+if(!sauvegarder()){
+documents.pop();
+return;
+}
+this.reset();
+afficher();
+alert("Document enregistré avec succès !");
+};
+
+if(fichier){
+const lecteur=new FileReader();
+lecteur.onload=()=>enregistrer({
+nom:fichier.name,
+type:fichier.type,
+contenu:lecteur.result
+});
+lecteur.onerror=()=>alert("Impossible de lire ce fichier.");
+lecteur.readAsDataURL(fichier);
+}else{
+enregistrer(null);
+}
+});
+
+function telecharger(id){
+const d=documents.find(x=>x.id===id);
+if(!d||!d.fichier)return;
+const a=document.createElement("a");
+a.href=d.fichier.contenu;
+a.download=d.fichier.nom;
+document.body.appendChild(a);
+a.click();
+a.remove();
+}
+
+function supprimer(id){
+if(!confirm("Voulez-vous vraiment supprimer ce document ?"))return;
+documents=documents.filter(d=>d.id!==id);
+if(sauvegarder())afficher();
+}
+
+document.getElementById("recherche").addEventListener("input",afficher);
+document.getElementById("filtreCategorie").addEventListener("change",afficher);
+document.getElementById("filtreStatut").addEventListener("change",afficher);
+
+afficher();
+</script>
+<script src="protection.js"></script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Budget des événements</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f2f4f8;color:#222;padding:20px}
+.container{max-width:1100px;margin:auto}
+header{background:#102b50;color:white;padding:22px;border-radius:10px;margin-bottom:20px}
+h1{font-size:23px;margin-bottom:8px}
+h2{font-size:19px;margin:20px 0 12px}
+.panel{background:white;padding:20px;border-radius:10px;margin-bottom:18px;box-shadow:0 2px 8px #00000012}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+textarea{min-height:75px}
+button{padding:11px 16px;border:0;border-radius:6px;cursor:pointer;font-weight:bold;margin-top:12px}
+.primary{background:#102b50;color:white}
+.danger{background:#c62828;color:white;padding:7px 10px}
+.back{background:#ddd;color:#222}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stat{background:#f5f7fb;padding:16px;border-radius:8px;border-left:4px solid #d6a52a}
+.stat small{display:block;color:#555;margin-bottom:8px}
+.stat strong{font-size:19px;color:#102b50}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:11px;border-bottom:1px solid #ddd;text-align:left;font-size:14px}
+th{background:#102b50;color:white}
+.table-wrap{overflow-x:auto}
+.message{padding:12px;background:#fff4d6;border-radius:6px;margin-top:12px}
+@media(max-width:600px){body{padding:10px}.panel{padding:14px}h1{font-size:20px}}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Gestion des budgets et finances des événements</p>
+</header>
+
+<div class="panel">
+<button class="back" onclick="location.href='dashboard.html'">← Retour au tableau de bord</button>
+
+<h2>1. Sélectionner un événement</h2>
+<label>Événement concerné</label>
+<select id="evenementSelect" onchange="afficherBudget()">
+<option value="">Chargement des événements...</option>
+</select>
+<div id="messageEvenement"></div>
+</div>
+
+<div id="zoneBudget" style="display:none">
+
+<div class="panel">
+<h2>2. Situation financière</h2>
+<div class="grid">
+<div class="stat"><small>Budget prévu</small><strong id="totalBudget">0 F CFA</strong></div>
+<div class="stat"><small>Dépenses</small><strong id="totalDepenses">0 F CFA</strong></div>
+<div class="stat"><small>Recettes</small><strong id="totalRecettes">0 F CFA</strong></div>
+<div class="stat"><small>Sponsoring reçu</small><strong id="totalSponsors">0 F CFA</strong></div>
+<div class="stat"><small>Apports en nature</small><strong id="totalNature">0 F CFA</strong></div>
+<div class="stat"><small>Solde financier</small><strong id="solde">0 F CFA</strong></div>
+<div class="stat"><small>Budget restant</small><strong id="budgetRestant">0 F CFA</strong></div>
+</div>
+</div>
+
+<div class="panel">
+<h2>3. Enregistrer une opération financière</h2>
+
+<label>Type d'opération</label>
+<select id="type">
+<option value="Budget prévu">Budget prévu</option>
+<option value="Dépense">Dépense</option>
+<option value="Recette">Recette</option>
+<option value="Sponsor">Sponsor / Sponsoring reçu</option>
+<option value="Nature">Contribution en nature</option>
+</select>
+
+<label>Catégorie</label>
+<input id="categorie" placeholder="Ex : Transport, restauration, communication...">
+
+<label>Description</label>
+<input id="description" placeholder="Détails de l'opération">
+
+<label>Montant en F CFA</label>
+<input id="montant" type="number" min="0" placeholder="Ex : 50000">
+
+<label>Date</label>
+<input id="date" type="date">
+
+<label>Nom du partenaire ou bénéficiaire</label>
+<input id="contact" placeholder="Nom du sponsor, fournisseur ou bénéficiaire">
+
+<label>Observations</label>
+<textarea id="observations" placeholder="Informations complémentaires"></textarea>
+
+<button class="primary" onclick="enregistrerOperation()">Enregistrer l'opération</button>
+</div>
+
+<div class="panel">
+<h2>4. Historique des opérations</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Catégorie</th>
+<th>Description</th>
+<th>Montant</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="listeOperations"></tbody>
+</table>
+</div>
+<p id="aucuneOperation" class="message" style="display:none">Aucune opération enregistrée pour cet événement.</p>
+</div>
+
+</div>
+</div>
+
+<script>
+const CLE_EVENEMENTS = "ajaddEvenements";
+const CLE_BUDGETS = "ajaddBudgetsEvenements";
+
+let evenements = [];
+let budgets = [];
+
+function lireDonnees(cle){
+    try{
+        const donnees = JSON.parse(localStorage.getItem(cle) || "[]");
+        return Array.isArray(donnees) ? donnees : [];
+    }catch(erreur){
+        return [];
+    }
+}
+
+function montantFCFA(valeur){
+    return new Intl.NumberFormat("fr-FR").format(Number(valeur) || 0) + " F CFA";
+}
+
+function chargerEvenements(){
+    evenements = lireDonnees(CLE_EVENEMENTS);
+
+    const select = document.getElementById("evenementSelect");
+    const message = document.getElementById("messageEvenement");
+
+    select.innerHTML = '<option value="">-- Choisir un événement --</option>';
+
+    if(evenements.length === 0){
+        message.innerHTML = '<p class="message">Aucun événement trouvé. Vérifie la page de gestion des événements.</p>';
+        return;
+    }
+
+    evenements.forEach((evenement,index)=>{
+        const identifiant = evenement.id || evenement.nom;
+        const option = document.createElement("option");
+        option.value = String(identifiant);
+        option.textContent = evenement.nom || "Événement " + (index + 1);
+        select.appendChild(option);
+    });
+
+    message.innerHTML = "";
+}
+
+function obtenirBudget(identifiant){
+    return budgets.find(b => String(b.evenementId) === String(identifiant));
+}
+
+function afficherBudget(){
+    const identifiant = document.getElementById("evenementSelect").value;
+    const zone = document.getElementById("zoneBudget");
+
+    if(!identifiant){
+        zone.style.display = "none";
+        return;
+    }
+
+    zone.style.display = "block";
+
+    const budget = obtenirBudget(identifiant);
+    const operations = budget ? budget.operations : [];
+
+    calculerTotaux(operations);
+    afficherOperations(operations);
+}
+
+function calculerTotaux(operations){
+    let prevu = 0;
+    let depenses = 0;
+    let recettes = 0;
+    let sponsors = 0;
+    let nature = 0;
+
+    operations.forEach(op=>{
+        const montant = Number(op.montant) || 0;
+
+        if(op.type === "Budget prévu") prevu += montant;
+        if(op.type === "Dépense") depenses += montant;
+        if(op.type === "Recette") recettes += montant;
+        if(op.type === "Sponsor") sponsors += montant;
+        if(op.type === "Nature") nature += montant;
+    });
+
+    document.getElementById("totalBudget").textContent = montantFCFA(prevu);
+    document.getElementById("totalDepenses").textContent = montantFCFA(depenses);
+    document.getElementById("totalRecettes").textContent = montantFCFA(recettes);
+    document.getElementById("totalSponsors").textContent = montantFCFA(sponsors);
+    document.getElementById("totalNature").textContent = montantFCFA(nature);
+    document.getElementById("solde").textContent = montantFCFA(recettes + sponsors - depenses);
+    document.getElementById("budgetRestant").textContent = montantFCFA(prevu - depenses);
+}
+
+function enregistrerOperation(){
+    const identifiant = document.getElementById("evenementSelect").value;
+
+    if(!identifiant){
+        alert("Sélectionne d'abord un événement.");
+        return;
+    }
+
+    const type = document.getElementById("type").value;
+    const categorie = document.getElementById("categorie").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const montant = Number(document.getElementById("montant").value);
+    const date = document.getElementById("date").value;
+
+    if(!categorie || !description || !date || !Number.isFinite(montant) || montant <= 0){
+        alert("Remplis la catégorie, la description, le montant et la date avec des valeurs valides.");
+        return;
+    }
+
+    let budget = obtenirBudget(identifiant);
+
+    if(!budget){
+        budget = {
+            evenementId: identifiant,
+            operations: []
+        };
+        budgets.push(budget);
+    }
+
+    budget.operations.push({
+        id: "OP-" + Date.now() + "-" + Math.random().toString(36).slice(2,7),
+        type,
+        categorie,
+        description,
+        montant,
+        date,
+        contact: document.getElementById("contact").value.trim(),
+        observations: document.getElementById("observations").value.trim()
+    });
+
+    localStorage.setItem(CLE_BUDGETS, JSON.stringify(budgets));
+
+    document.getElementById("categorie").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("montant").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("observations").value = "";
+
+    afficherBudget();
+    alert("Opération enregistrée avec succès !");
+}
+
+function afficherOperations(operations){
+    const liste = document.getElementById("listeOperations");
+    const message = document.getElementById("aucuneOperation");
+
+    liste.innerHTML = "";
+
+    if(operations.length === 0){
+        message.style.display = "block";
+        return;
+    }
+
+    message.style.display = "none";
+
+    operations.forEach(op=>{
+        const ligne = document.createElement("tr");
+
+        const valeurs = [
+            op.type,
+            op.categorie,
+            op.description,
+            montantFCFA(op.montant),
+            op.date
+        ];
+
+        valeurs.forEach(valeur=>{
+            const cellule = document.createElement("td");
+            cellule.textContent = valeur || "";
+            ligne.appendChild(cellule);
+        });
+
+        const celluleAction = document.createElement("td");
+        const bouton = document.createElement("button");
+        bouton.className = "danger";
+        bouton.textContent = "Supprimer";
+        bouton.onclick = ()=>supprimerOperation(op.id);
+
+        celluleAction.appendChild(bouton);
+        ligne.appendChild(celluleAction);
+        liste.appendChild(ligne);
+    });
+}
+
+function supprimerOperation(id){
+    if(!confirm("Veux-tu vraiment supprimer cette opération ?")) return;
+
+    const identifiant = document.getElementById("evenementSelect").value;
+    const budget = obtenirBudget(identifiant);
+
+    if(!budget) return;
+
+    budget.operations = budget.operations.filter(op=>op.id !== id);
+
+    localStorage.setItem(CLE_BUDGETS, JSON.stringify(budgets));
+    afficherBudget();
+}
+
+function initialiser(){
+    budgets = lireDonnees(CLE_BUDGETS);
+    chargerEvenements();
+}
+
+initialiser();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

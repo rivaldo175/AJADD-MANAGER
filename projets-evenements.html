@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Projets événementiels</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f5f9;color:#202b3c}
+header{background:#101d35;color:white;padding:22px}
+header h1{color:#e3bd62;font-size:23px}
+header p{margin-top:7px;font-size:13px}
+.container{max-width:1150px;margin:auto;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+button{border:0;padding:11px 15px;border-radius:7px;cursor:pointer;font-weight:bold}
+.primary{background:#c59b43;color:white}
+.secondary{background:#172943;color:white}
+.danger{background:#c0392b;color:white}
+.card{background:white;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 3px 12px #0000000b}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:white;padding:18px;border-radius:10px}
+.stat strong{display:block;font-size:25px;color:#bd9137;margin-top:8px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+label{font-weight:bold;font-size:13px}
+input,select,textarea{padding:11px;border:1px solid #d8dee8;border-radius:7px;width:100%;font:inherit}
+textarea{min-height:95px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;font-size:13px}
+th{background:#f4f5f8}
+.table-wrap{overflow-x:auto}
+.empty{text-align:center;color:#777;padding:25px}
+.hidden{display:none}
+.note{background:#fff8e8;padding:12px;border-radius:8px;margin:15px 0;font-size:13px}
+@media(max-width:600px){
+.form-grid{grid-template-columns:1fr}
+.field.full{grid-column:auto}
+.container{padding:12px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Élaboration et suivi des projets événementiels</p>
+</header>
+
+<div class="container">
+
+<div class="top">
+<div>
+<h2>Dossiers de projets</h2>
+<p>Préparation administrative et technique des événements.</p>
+</div>
+<button class="primary" onclick="nouveauProjet()">+ Nouveau dossier</button>
+</div>
+
+<div class="stats">
+<div class="stat">Événements<strong id="totalEvenements">0</strong></div>
+<div class="stat">Dossiers créés<strong id="totalProjets">0</strong></div>
+<div class="stat">Dossiers à compléter<strong id="aCompleter">0</strong></div>
+</div>
+
+<div class="card hidden" id="formulaire">
+<h3 id="titreForm">Nouveau dossier de projet</h3>
+
+<div class="note">
+Chaque dossier est associé à un événement enregistré dans le module Gestion des événements.
+</div>
+
+<form id="projetForm">
+<div class="form-grid">
+
+<div class="field full">
+<label>Événement concerné *</label>
+<select id="evenementId" required>
+<option value="">Sélectionner un événement</option>
+</select>
+</div>
+
+<div class="field full">
+<label>Titre officiel du projet *</label>
+<input id="titre" required placeholder="Ex : Projet d'organisation de AJADD TOP MODEL">
+</div>
+
+<div class="field full">
+<label>Thème du projet</label>
+<input id="theme" placeholder="Thème officiel">
+</div>
+
+<div class="field full">
+<label>1. Contexte et justification</label>
+<textarea id="contexte" placeholder="Présentez le contexte et les raisons qui justifient l'organisation de cet événement."></textarea>
+</div>
+
+<div class="field full">
+<label>2. Problématique</label>
+<textarea id="problematique" placeholder="Quel problème ou besoin ce projet cherche-t-il à résoudre ?"></textarea>
+</div>
+
+<div class="field full">
+<label>3. Objectif général</label>
+<textarea id="objectifGeneral" placeholder="Présentez l'objectif principal du projet."></textarea>
+</div>
+
+<div class="field full">
+<label>4. Objectifs spécifiques</label>
+<textarea id="objectifsSpecifiques" placeholder="Indiquez les objectifs spécifiques, un par ligne."></textarea>
+</div>
+
+<div class="field full">
+<label>5. Résultats attendus</label>
+<textarea id="resultats" placeholder="Quels résultats concrets sont attendus ?"></textarea>
+</div>
+
+<div class="field full">
+<label>6. Activités à réaliser</label>
+<textarea id="activites" placeholder="Listez les principales activités nécessaires à la réalisation du projet."></textarea>
+</div>
+
+<div class="field full">
+<label>7. Programme prévisionnel</label>
+<textarea id="programme" placeholder="Décrivez le déroulement de l'événement : accueil, cérémonie, interventions, prestations, clôture..."></textarea>
+</div>
+
+<div class="field full">
+<label>8. Chronogramme d'exécution</label>
+<textarea id="chronogramme" placeholder="Exemple : janvier : préparation ; février : communication ; mars : réalisation..."></textarea>
+</div>
+
+<div class="field">
+<label>9. Public cible</label>
+<textarea id="publicCible" placeholder="Ex : jeunes, femmes, entrepreneurs..."></textarea>
+</div>
+
+<div class="field">
+<label>Bénéficiaires attendus</label>
+<textarea id="beneficiaires" placeholder="Qui bénéficiera du projet ?"></textarea>
+</div>
+
+<div class="field full">
+<label>10. Stratégie de communication</label>
+<textarea id="communication" placeholder="Réseaux sociaux, affiches, médias, radios, presse, influenceurs..."></textarea>
+</div>
+
+<div class="field full">
+<label>11. Équipe d'organisation et répartition des responsabilités</label>
+<textarea id="equipe" placeholder="Indiquez les responsables, les commissions et leurs missions."></textarea>
+</div>
+
+<div class="field full">
+<label>12. Partenaires et sponsors recherchés</label>
+<textarea id="partenaires" placeholder="Indiquez les partenaires recherchés et les formes de partenariat souhaitées."></textarea>
+</div>
+
+<div class="field full">
+<label>13. Risques et mesures préventives</label>
+<textarea id="risques" placeholder="Identifiez les risques possibles et les solutions prévues."></textarea>
+</div>
+
+<div class="field full">
+<label>14. Conclusion et perspectives</label>
+<textarea id="conclusion" placeholder="Présentez l'importance du projet et les perspectives après sa réalisation."></textarea>
+</div>
+
+<div class="field">
+<label>Responsable du projet</label>
+<input id="responsable" placeholder="Nom et prénom">
+</div>
+
+<div class="field">
+<label>Statut du dossier</label>
+<select id="statut">
+<option>En rédaction</option>
+<option>À valider</option>
+<option>Validé</option>
+<option>En exécution</option>
+<option>Clôturé</option>
+</select>
+</div>
+
+</div>
+
+<div class="actions">
+<button type="submit" class="primary">Enregistrer le dossier</button>
+<button type="button" class="secondary" onclick="fermerFormulaire()">Annuler</button>
+</div>
+</form>
+</div>
+
+<div class="card">
+<h3>Liste des dossiers de projets</h3>
+<br>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Projet</th>
+<th>Événement</th>
+<th>Responsable</th>
+<th>Statut</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="listeProjets"></tbody>
+</table>
+</div>
+</div>
+
+<div class="actions">
+<button class="secondary" onclick="location.href='evenements.html'">← Gestion des événements</button>
+<button class="secondary" onclick="location.href='dashboard.html'">Tableau de bord</button>
+</div>
+
+</div>
+
+<script>
+const CLE_PROJETS = "ajaddProjetsEvenements";
+const CLE_EVENEMENTS = "ajaddEvenements";
+
+let projetEnModification = null;
+
+const champs = [
+"evenementId","titre","theme","contexte","problematique",
+"objectifGeneral","objectifsSpecifiques","resultats","activites",
+"programme","chronogramme","publicCible","beneficiaires",
+"communication","equipe","partenaires","risques","conclusion",
+"responsable","statut"
+];
+
+function obtenirEvenements(){
+    try{
+        const data = JSON.parse(localStorage.getItem(CLE_EVENEMENTS) || "[]");
+        return Array.isArray(data) ? data : [];
+    }catch(e){return [];}
+}
+
+function obtenirProjets(){
+    try{
+        const data = JSON.parse(localStorage.getItem(CLE_PROJETS) || "[]");
+        return Array.isArray(data) ? data : [];
+    }catch(e){return [];}
+}
+
+function enregistrerProjets(liste){
+    localStorage.setItem(CLE_PROJETS,JSON.stringify(liste));
+}
+
+function echapper(valeur){
+    return String(valeur ?? "").replace(/[&<>"']/g,function(c){
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+}
+
+function chargerEvenements(){
+    const select = document.getElementById("evenementId");
+    const evenements = obtenirEvenements();
+    const ancienneValeur = select.value;
+
+    select.innerHTML = '<option value="">Sélectionner un événement</option>';
+
+    evenements.forEach(ev=>{
+        select.innerHTML += `<option value="${echapper(ev.id)}">${echapper(ev.nom)}</option>`;
+    });
+
+    if(evenements.some(ev=>ev.id === ancienneValeur)){
+        select.value = ancienneValeur;
+    }
+
+    document.getElementById("totalEvenements").textContent = evenements.length;
+}
+
+function nouveauProjet(){
+    if(obtenirEvenements().length === 0){
+        alert("Vous devez d'abord créer un événement dans le module Gestion des événements.");
+        return;
+    }
+
+    projetEnModification = null;
+    document.getElementById("projetForm").reset();
+    document.getElementById("titreForm").textContent = "Nouveau dossier de projet";
+    chargerEvenements();
+    document.getElementById("formulaire").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function fermerFormulaire(){
+    document.getElementById("formulaire").classList.add("hidden");
+    projetEnModification = null;
+}
+
+document.getElementById("projetForm").addEventListener("submit",function(e){
+    e.preventDefault();
+
+    const liste = obtenirProjets();
+    const evenementId = document.getElementById("evenementId").value;
+    const evenement = obtenirEvenements().find(ev=>ev.id === evenementId);
+
+    if(!evenement){
+        alert("Veuillez sélectionner un événement valide.");
+        return;
+    }
+
+    const projet = {
+        id: projetEnModification || ("PROJ-" + Date.now()),
+        evenementId: evenement.id,
+        evenementNom: evenement.nom,
+        dateModification: new Date().toISOString()
+    };
+
+    champs.forEach(champ=>{
+        projet[champ] = document.getElementById(champ).value;
+    });
+
+    // Un seul dossier principal par événement.
+    const dejaExistant = liste.find(p =>
+        p.evenementId === evenementId && p.id !== projetEnModification
+    );
+
+    if(dejaExistant){
+        alert("Un dossier existe déjà pour cet événement. Utilisez Modifier pour le mettre à jour.");
+        return;
+    }
+
+    if(projetEnModification){
+        const index = liste.findIndex(p=>p.id === projetEnModification);
+        if(index !== -1) liste[index] = projet;
+    }else{
+        liste.push(projet);
+    }
+
+    enregistrerProjets(liste);
+    fermerFormulaire();
+    afficherProjets();
+    alert("Dossier de projet enregistré avec succès !");
+});
+
+function modifierProjet(id){
+    const projet = obtenirProjets().find(p=>p.id === id);
+    if(!projet) return;
+
+    projetEnModification = id;
+    chargerEvenements();
+
+    champs.forEach(champ=>{
+        document.getElementById(champ).value = projet[champ] ?? "";
+    });
+
+    document.getElementById("titreForm").textContent = "Modifier le dossier de projet";
+    document.getElementById("formulaire").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function supprimerProjet(id){
+    if(!confirm("Voulez-vous vraiment supprimer ce dossier de projet ?")) return;
+
+    const liste = obtenirProjets().filter(p=>p.id !== id);
+    enregistrerProjets(liste);
+    afficherProjets();
+}
+
+function afficherProjets(){
+    const projets = obtenirProjets();
+    const evenements = obtenirEvenements();
+    const tableau = document.getElementById("listeProjets");
+
+    const nombreComplets = projets.filter(p=>
+        p.contexte && p.objectifGeneral && p.activites && p.conclusion
+    ).length;
+
+    document.getElementById("totalProjets").textContent = projets.length;
+    document.getElementById("aCompleter").textContent = projets.length - nombreComplets;
+
+    if(projets.length === 0){
+        tableau.innerHTML = '<tr><td colspan="5" class="empty">Aucun dossier de projet enregistré.</td></tr>';
+        return;
+    }
+
+    tableau.innerHTML = projets.map(p=>{
+        const evenement = evenements.find(ev=>ev.id === p.evenementId);
+        const nomEvenement = evenement ? evenement.nom : (p.evenementNom || "Événement introuvable");
+
+        return `
+        <tr>
+            <td><strong>${echapper(p.titre)}</strong></td>
+            <td>${echapper(nomEvenement)}</td>
+            <td>${echapper(p.responsable || "Non renseigné")}</td>
+            <td>${echapper(p.statut)}</td>
+            <td>
+                <button class="secondary" onclick="modifierProjet('${p.id}')">Modifier</button>
+                <button class="danger" onclick="supprimerProjet('${p.id}')">Supprimer</button>
+            </td>
+        </tr>`;
+    }).join("");
+}
+
+chargerEvenements();
+afficherProjets();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

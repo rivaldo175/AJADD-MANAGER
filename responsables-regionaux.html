@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Responsables régionaux</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f3f5f8;
+    color: #17263b;
+}
+
+header {
+    background: #071b36;
+    color: white;
+    padding: 20px;
+    border-bottom: 4px solid #d5aa42;
+}
+
+header h1 {
+    font-size: 23px;
+}
+
+header p {
+    color: #e6c46d;
+    margin-top: 6px;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 15px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+button {
+    border: none;
+    padding: 11px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.back {
+    background: #071b36;
+    color: white;
+}
+
+.form-box, .table-box {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+}
+
+h2 {
+    color: #071b36;
+    margin-bottom: 18px;
+}
+
+.info {
+    background: #fff8e8;
+    border: 1px solid #e7ce91;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    color: #604b1c;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 7px;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd3dc;
+    border-radius: 6px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #bd902c;
+}
+
+.submit {
+    margin-top: 18px;
+    background: #bd902c;
+    color: white;
+}
+
+.cancel {
+    margin-top: 18px;
+    background: #68778a;
+    color: white;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e3e7ec;
+}
+
+th {
+    background: #071b36;
+    color: white;
+}
+
+.edit {
+    background: #e6c46d;
+}
+
+.empty {
+    color: #68778a;
+    text-align: center;
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #68778a;
+    font-size: 12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>AJADD MANAGER</h1>
+    <p>Gestion des responsables régionaux</p>
+</header>
+
+<main>
+
+    <div class="topbar">
+        <h2>Responsables régionaux</h2>
+
+        <button class="back"
+        onclick="location.href='dashboard.html'">
+            ← Tableau de bord
+        </button>
+    </div>
+
+    <div class="info">
+        <strong>Organisation régionale d'AJADD-TOGO</strong><br>
+        Ce module permet de gérer les responsables des cinq régions.
+        Les informations sont enregistrées directement dans les bureaux
+        régionaux existants.
+    </div>
+
+    <section class="form-box">
+
+        <h2>Enregistrer ou modifier les responsables</h2>
+
+        <form id="responsablesForm">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Choisir un bureau régional *</label>
+                    <select id="region" required>
+                        <option value="">Choisir une région</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Directeur régional</label>
+                    <input type="text" id="directeur">
+                </div>
+
+                <div>
+                    <label>Secrétaire régional</label>
+                    <input type="text" id="secretaire">
+                </div>
+
+                <div>
+                    <label>Secrétaire régional adjoint</label>
+                    <input type="text" id="secretaireAdjoint">
+                </div>
+
+                <div>
+                    <label>Trésorier régional</label>
+                    <input type="text" id="tresorier">
+                </div>
+
+                <div>
+                    <label>Trésorier régional adjoint</label>
+                    <input type="text" id="tresorierAdjoint">
+                </div>
+
+                <div>
+                    <label>Premier conseiller</label>
+                    <input type="text" id="premierConseiller">
+                </div>
+
+                <div>
+                    <label>Deuxième conseiller</label>
+                    <input type="text" id="deuxiemeConseiller">
+                </div>
+
+            </div>
+
+            <button type="submit" class="submit">
+                Enregistrer les responsables
+            </button>
+
+            <button type="button" class="cancel"
+            onclick="reinitialiserFormulaire()">
+                Réinitialiser
+            </button>
+
+        </form>
+
+    </section>
+
+    <section class="table-box">
+
+        <h2>Liste des responsables régionaux</h2>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Région</th>
+                        <th>Directeur régional</th>
+                        <th>Secrétaire régional</th>
+                        <th>Trésorier régional</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tableResponsables"></tbody>
+            </table>
+        </div>
+
+        <p id="messageVide" class="empty">
+            Aucun bureau régional enregistré.
+        </p>
+
+    </section>
+
+</main>
+
+<footer>
+    AJADD-TOGO © 2026 — Gestion administrative régionale
+</footer>
+
+<script>
+
+const CLE = "ajaddRegions";
+
+const champs = [
+    "directeur",
+    "secretaire",
+    "secretaireAdjoint",
+    "tresorier",
+    "tresorierAdjoint",
+    "premierConseiller",
+    "deuxiemeConseiller"
+];
+
+function lireRegions() {
+    try {
+        const donnees = JSON.parse(localStorage.getItem(CLE));
+        return Array.isArray(donnees) ? donnees : [];
+    } catch (erreur) {
+        return [];
+    }
+}
+
+function remplirRegions() {
+
+    const liste = lireRegions();
+    const select = document.getElementById("region");
+    const ancienneValeur = select.value;
+
+    select.innerHTML = '<option value="">Choisir une région</option>';
+
+    liste.forEach((bureau, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = bureau.region;
+        select.appendChild(option);
+    });
+
+    if (ancienneValeur !== "" && liste[ancienneValeur]) {
+        select.value = ancienneValeur;
+    }
+}
+
+function chargerResponsables() {
+
+    const index = document.getElementById("region").value;
+    const liste = lireRegions();
+
+    if (index === "" || !liste[index]) {
+        champs.forEach(champ => {
+            document.getElementById(champ).value = "";
+        });
+        return;
+    }
+
+    const bureau = liste[index];
+
+    champs.forEach(champ => {
+        document.getElementById(champ).value = bureau[champ] || "";
+    });
+}
+
+document.getElementById("region").addEventListener(
+    "change",
+    chargerResponsables
+);
+
+document.getElementById("responsablesForm")
+.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const index = document.getElementById("region").value;
+    const liste = lireRegions();
+
+    if (index === "" || !liste[index]) {
+        alert("Veuillez sélectionner un bureau régional.");
+        return;
+    }
+
+    const bureau = {...liste[index]};
+
+    champs.forEach(champ => {
+        bureau[champ] = document.getElementById(champ).value.trim();
+    });
+
+    liste[index] = bureau;
+
+    localStorage.setItem(CLE, JSON.stringify(liste));
+
+    alert("Les responsables régionaux ont été enregistrés avec succès.");
+
+    afficherResponsables();
+    chargerResponsables();
+});
+
+function afficherResponsables() {
+
+    const liste = lireRegions();
+    const tableau = document.getElementById("tableResponsables");
+    const messageVide = document.getElementById("messageVide");
+
+    tableau.innerHTML = "";
+
+    messageVide.style.display =
+        liste.length === 0 ? "block" : "none";
+
+    liste.forEach((bureau, index) => {
+
+        const ligne = document.createElement("tr");
+
+        const valeurs = [
+            bureau.region || "-",
+            bureau.directeur || "Non renseigné",
+            bureau.secretaire || "Non renseigné",
+            bureau.tresorier || "Non renseigné"
+        ];
+
+        valeurs.forEach(valeur => {
+            const cellule = document.createElement("td");
+            cellule.textContent = valeur;
+            ligne.appendChild(cellule);
+        });
+
+        const actions = document.createElement("td");
+
+        const modifier = document.createElement("button");
+        modifier.textContent = "Modifier";
+        modifier.className = "edit";
+
+        modifier.onclick = () => {
+            document.getElementById("region").value = index;
+            chargerResponsables();
+            window.scrollTo({top: 0, behavior: "smooth"});
+        };
+
+        actions.appendChild(modifier);
+        ligne.appendChild(actions);
+
+        tableau.appendChild(ligne);
+    });
+}
+
+function reinitialiserFormulaire() {
+    document.getElementById("responsablesForm").reset();
+    chargerResponsables();
+}
+
+remplirRegions();
+afficherResponsables();
+
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

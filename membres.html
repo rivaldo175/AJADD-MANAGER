@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion des membres - AJADD MANAGER</title>
+
+<!-- Bibliothèque de génération QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f1f3f7;
+    color: #17263b;
+    padding: 20px;
+}
+
+header {
+    background: #071b36;
+    color: white;
+    padding: 20px;
+    border-bottom: 5px solid #d5aa42;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+header img {
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: white;
+}
+
+header h1 {
+    font-size: 23px;
+}
+
+header p {
+    color: #e6c46d;
+    margin-top: 6px;
+}
+
+.back-button, .action-button {
+    padding: 12px 17px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.back-button {
+    background: #071b36;
+    color: white;
+}
+
+.container {
+    max-width: 1050px;
+    margin: auto;
+}
+
+.panel {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.06);
+}
+
+.panel h2 {
+    color: #071b36;
+    border-bottom: 2px solid #d5aa42;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 7px;
+    color: #193653;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd2dc;
+    border-radius: 6px;
+    font-size: 15px;
+    background: white;
+}
+
+.action-button {
+    background: #071b36;
+    color: white;
+    margin-top: 18px;
+}
+
+.action-button:hover, .back-button:hover {
+    background: #bd902c;
+    color: #071b36;
+}
+
+#message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.card-area {
+    display: none;
+}
+
+.member-card {
+    width: 100%;
+    max-width: 950px;
+    min-height: 540px;
+    margin: 20px auto;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    border: 5px solid #d5aa42;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #fff 60%, #e9eef6);
+    color: #071b36;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: #071b36;
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    border-bottom: 4px solid #d5aa42;
+}
+
+.card-top img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: white;
+    object-fit: contain;
+}
+
+.card-top h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.card-top p {
+    color: #f0d27b;
+    font-size: 13px;
+}
+
+.card-title {
+    background: #071b36;
+    color: white;
+    border: 3px solid #d5aa42;
+    border-radius: 30px;
+    text-align: center;
+    padding: 10px;
+    font-size: 27px;
+    margin: 18px 0;
+}
+
+.card-content {
+    display: grid;
+    grid-template-columns: 175px 1fr 125px;
+    gap: 15px;
+    align-items: start;
+}
+
+.photo-frame {
+    border: 4px solid #d5aa42;
+    border-radius: 12px;
+    height: 205px;
+    overflow: hidden;
+    background: #e6eaf0;
+}
+
+.photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.member-info p {
+    margin: 10px 0;
+    border-bottom: 1px dotted #9aa5b3;
+    padding-bottom: 7px;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+.member-info strong {
+    color: #071b36;
+}
+
+.qr-area {
+    text-align: center;
+    font-size: 11px;
+}
+
+#qrcode {
+    width: 115px;
+    height: 115px;
+    padding: 5px;
+    background: white;
+    margin: auto;
+    border: 2px solid #d5aa42;
+}
+
+#qrcode img, #qrcode canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 22px;
+    padding-top: 12px;
+    border-top: 3px solid #d5aa42;
+}
+
+.validity {
+    background: #071b36;
+    color: white;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    line-height: 1.6;
+}
+
+.validity span {
+    color: #f0d27b;
+}
+
+.slogan {
+    color: #071b36;
+    font-style: italic;
+    font-weight: bold;
+    text-align: center;
+}
+
+.signature {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.print-button {
+    background: #bd902c;
+    color: #071b36;
+}
+
+.member-list {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #071b36;
+    color: white;
+}
+
+@media(max-width: 700px) {
+    body { padding: 10px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: auto; }
+    .card-content {
+        grid-template-columns: 110px 1fr;
+    }
+    .photo-frame { height: 150px; }
+    .qr-area { grid-column: 1 / -1; }
+    .card-top h2 { font-size: 20px; }
+    .card-title { font-size: 21px; }
+    .member-info p { font-size: 12px; }
+    .card-bottom { flex-direction: column; }
+}
+
+@media print {
+    body { background: white; padding: 0; }
+    body * { visibility: hidden; }
+    #cardArea, #cardArea * { visibility: visible; }
+    #cardArea {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .member-card {
+        max-width: 100%;
+        min-height: 0;
+        margin: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .no-print { display: none !important; }
+    @page { size: landscape; margin: 8mm; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<button class="back-button no-print"
+onclick="location.href='dashboard.html'">
+← Retour au tableau de bord
+</button>
+
+<header>
+    <div class="header-content">
+        <img src="images/logo-ajadd.png" alt="Logo AJADD">
+        <div>
+            <h1>AJADD MANAGER</h1>
+            <p>GESTION DES MEMBRES ET DES CARTES OFFICIELLES</p>
+        </div>
+    </div>
+</header>
+
+<section class="panel no-print">
+    <h2>Nouvelle fiche de membre</h2>
+
+    <form id="memberForm">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Photo du membre</label>
+                <input type="file" id="photo" accept="image/*" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nom</label>
+                <input type="text" id="nom" required>
+            </div>
+
+            <div class="form-group">
+                <label>Prénoms</label>
+                <input type="text" id="prenoms" required>
+            </div>
+
+            <div class="form-group">
+                <label>Date de naissance</label>
+                <input type="date" id="naissance" required>
+            </div>
+
+            <div class="form-group">
+                <label>Téléphone / WhatsApp</label>
+                <input type="tel" id="telephone" required>
+            </div>
+
+            <div class="form-group">
+                <label>Fonction</label>
+                <select id="fonction" required>
+                    <option value="">Choisir une fonction</option>
+                    <option>Président-Directeur général</option>
+                    <option>Directrice générale</option>
+                    <option>Secrétaire général(e)</option>
+                    <option>Secrétaire général(e) adjoint(e)</option>
+                    <option>Trésorier(ère) général(e)</option>
+                    <option>Trésorier(ère) général(e) adjoint(e)</option>
+                    <option>Premier(ère) conseiller(ère)</option>
+                    <option>Deuxième conseiller(ère)</option>
+                    <option>Responsable national(e) de département</option>
+                    <option>Directeur(trice) régional(e)</option>
+                    <option>Secrétaire régional(e)</option>
+                    <option>Secrétaire régional(e) adjoint(e)</option>
+                    <option>Trésorier(ère) régional(e)</option>
+                    <option>Trésorier(ère) régional(e) adjoint(e)</option>
+                    <option>Premier(ère) conseiller(ère) régional(e)</option>
+                    <option>Deuxième conseiller(ère) régional(e)</option>
+                    <option>Membre du Conseil d'administration</option>
+                    <option>Membre actif(ve)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Département</label>
+                <select id="departement" required>
+                    <option value="">Choisir un département</option>
+                    <option>Direction générale</option>
+                    <option>Bureau exécutif national</option>
+                    <option>Services digitaux</option>
+                    <option>Commerciaux et Entrepreneuriat</option>
+                    <option>Événementiel et Culture</option>
+                    <option>Formations et Éducation</option>
+                    <option>Relations extérieures et Partenariats</option>
+                    <option>Conseil d'administration</option>
+                    <option>Bureau régional</option>
+                    <option>Autre</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Région</label>
+                <select id="region" required>
+                    <option value="">Choisir une région</option>
+                    <option>Maritime</option>
+                    <option>Plateaux</option>
+                    <option>Centrale</option>
+                    <option>Kara</option>
+                    <option>Savanes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Date de début d'adhésion</label>
+                <input type="date" id="dateAdhesion" required>
+            </div>
+
+            <div class="form-group full">
+                <label>Adresse</label>
+                <input type="text" id="adresse" required>
+            </div>
+
+        </div>
+
+        <button type="submit" class="action-button">
+            GÉNÉRER LA CARTE DE MEMBRE
+        </button>
+
+        <p id="message"></p>
+
+    </form>
+</section>
+
+<section class="panel card-area" id="cardArea">
+
+    <h2 class="no-print">Carte officielle générée</h2>
+
+    <div class="member-card" id="memberCard">
+
+        <div class="card-top">
+            <img src="images/logo-ajadd.png" alt="Logo AJADD">
+            <div>
+                <h2>AJADD-TOGO</h2>
+                <p>AMICALE DES JEUNES AMBITIEUX ET DYNAMIQUES</p>
+                <p>POUR LE DÉVELOPPEMENT</p>
+                <p><strong>Ensemble pour un avenir meilleur</strong></p>
+            </div>
+        </div>
+
+        <div class="card-title">CARTE DE MEMBRE</div>
+
+        <div class="card-content">
+
+            <div class="photo-frame">
+                <img id="cardPhoto" alt="Photo du membre">
+            </div>
+
+            <div class="member-info">
+                <p><strong>Nom :</strong> <span id="cardNom"></span></p>
+                <p><strong>Prénoms :</strong> <span id="cardPrenoms"></span></p>
+                <p><strong>Fonction :</strong> <span id="cardFonction"></span></p>
+                <p><strong>Département :</strong> <span id="cardDepartement"></span></p>
+                <p><strong>Région :</strong> <span id="cardRegion"></span></p>
+                <p><strong>Matricule :</strong> <span id="cardMatricule"></span></p>
+            </div>
+
+            <div class="qr-area">
+                <div id="qrcode"></div>
+                <p>Scannez pour vérifier les informations</p>
+            </div>
+
+        </div>
+
+        <div class="card-bottom">
+
+            <div class="validity">
+                <span>VALABLE DU :</span><br>
+                <span id="dateDebut"></span><br>
+                <span>AU :</span><br>
+                <span id="dateFin"></span>
+            </div>
+
+            <div class="slogan">
+                AJADD, plus qu'une association,<br>
+                une grande famille !
+            </div>
+
+            <div class="signature">
+                LE PRÉSIDENT-DIRECTEUR GÉNÉRAL<br><br>
+                ____________________
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="no-print">
+        <button class="action-button print-button"
+        onclick="window.print()">
+            IMPRIMER LA CARTE
+        </button>
+    </div>
+
+</section>
+
+<section class="panel no-print">
+    <h2>Membres enregistrés sur cet ordinateur</h2>
+    <div class="member-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Nom</th>
+                    <th>Prénoms</th>
+                    <th>Fonction</th>
+                    <th>Région</th>
+                </tr>
+            </thead>
+            <tbody id="memberTable">
+            </tbody>
+        </table>
+    </div>
+    <p id="emptyList" style="margin-top:15px;color:#777;">
+        Aucun membre enregistré pour le moment.
+    </p>
+</section>
+
+</div>
+
+<script>
+const form = document.getElementById("memberForm");
+const message = document.getElementById("message");
+
+function formatDate(date) {
+    return date.toLocaleDateString("fr-FR");
+}
+
+function getMembers() {
+    return JSON.parse(localStorage.getItem("ajaddMembers") || "[]");
+}
+
+function showMembers() {
+    const members = getMembers();
+    const table = document.getElementById("memberTable");
+    const empty = document.getElementById("emptyList");
+
+    table.innerHTML = "";
+
+    empty.style.display = members.length ? "none" : "block";
+
+    members.forEach(member => {
+        const row = document.createElement("tr");
+
+        [
+            member.matricule,
+            member.nom,
+            member.prenoms,
+            member.fonction,
+            member.region
+        ].forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+    });
+}
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const photoFile = document.getElementById("photo").files[0];
+
+    if (!photoFile) {
+        message.textContent = "Veuillez sélectionner une photo.";
+        return;
+    }
+
+    if (!photoFile.type.startsWith("image/")) {
+        message.textContent = "Le fichier sélectionné n'est pas une image.";
+        return;
+    }
+
+    if (photoFile.size > 3 * 1024 * 1024) {
+        message.textContent = "La photo ne doit pas dépasser 3 Mo.";
+        return;
+    }
+
+    const dateAdhesion = new Date(
+        document.getElementById("dateAdhesion").value + "T12:00:00"
+    );
+
+    if (isNaN(dateAdhesion.getTime())) {
+        message.textContent = "Veuillez saisir une date d'adhésion valide.";
+        return;
+    }
+
+    const dateNaissance = document.getElementById("naissance").value;
+
+    if (new Date(dateNaissance) >= new Date(dateAdhesion)) {
+        message.textContent = "La date de naissance doit précéder l'adhésion.";
+        return;
+    }
+
+    const dateExpiration = new Date(dateAdhesion);
+    dateExpiration.setFullYear(dateExpiration.getFullYear() + 2);
+    dateExpiration.setDate(dateExpiration.getDate() - 1);
+
+    const members = getMembers();
+
+    const annee = dateAdhesion.getFullYear();
+    const numero = String(members.length + 1).padStart(3, "0");
+    const matricule = "AJADD-" + annee + "-" + numero;
+
+    const reader = new FileReader();
+
+    reader.onload = function() {
+
+        const member = {
+            matricule: matricule,
+            nom: document.getElementById("nom").value.trim(),
+            prenoms: document.getElementById("prenoms").value.trim(),
+            fonction: document.getElementById("fonction").value,
+            departement: document.getElementById("departement").value,
+            region: document.getElementById("region").value,
+            photo: reader.result,
+            dateAdhesion: formatDate(dateAdhesion),
+            dateExpiration: formatDate(dateExpiration)
+        };
+
+        members.push(member);
+        localStorage.setItem("ajaddMembers", JSON.stringify(members));
+
+        document.getElementById("cardPhoto").src = member.photo;
+        document.getElementById("cardNom").textContent = member.nom;
+        document.getElementById("cardPrenoms").textContent = member.prenoms;
+        document.getElementById("cardFonction").textContent = member.fonction;
+        document.getElementById("cardDepartement").textContent = member.departement;
+        document.getElementById("cardRegion").textContent = member.region;
+        document.getElementById("cardMatricule").textContent = member.matricule;
+        document.getElementById("dateDebut").textContent = member.dateAdhesion;
+        document.getElementById("dateFin").textContent = member.dateExpiration;
+
+        const qr = document.getElementById("qrcode");
+        qr.innerHTML = "";
+
+        const qrData = JSON.stringify({
+            organisation: "AJADD-TOGO",
+            matricule: member.matricule,
+            nom: member.nom,
+            prenoms: member.prenoms
+        });
+
+        if (typeof QRCode !== "undefined") {
+            new QRCode(qr, {
+                text: qrData,
+                width: 105,
+                height: 105,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } else {
+            qr.textContent = "QR indisponible";
+        }
+
+        document.getElementById("cardArea").style.display = "block";
+        message.style.color = "green";
+        message.textContent = "Membre enregistré et carte générée avec succès.";
+
+        showMembers();
+
+        document.getElementById("cardArea").scrollIntoView({
+            behavior: "smooth"
+        });
+    };
+
+    reader.onerror = function() {
+        message.style.color = "red";
+        message.textContent = "Impossible de lire la photo sélectionnée.";
+    };
+
+    reader.readAsDataURL(photoFile);
+});
+
+showMembers();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

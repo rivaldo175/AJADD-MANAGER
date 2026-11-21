@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Gestion des événements</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f5f9;color:#202b3c}
+header{background:#101d35;color:white;padding:22px}
+header h1{color:#e3bd62;font-size:23px}
+header p{margin-top:7px;font-size:13px}
+.container{max-width:1150px;margin:auto;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+button{border:0;padding:11px 15px;border-radius:7px;cursor:pointer;font-weight:bold}
+.primary{background:#c59b43;color:white}
+.secondary{background:#172943;color:white}
+.danger{background:#c0392b;color:white}
+.card{background:white;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 3px 12px #0000000b}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:white;padding:18px;border-radius:10px}
+.stat strong{display:block;font-size:25px;color:#bd9137;margin-top:8px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+label{font-weight:bold;font-size:13px}
+input,select,textarea{padding:11px;border:1px solid #d8dee8;border-radius:7px;width:100%;font:inherit}
+textarea{min-height:85px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+table{width:100%;border-collapse:collapse;min-width:750px}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;font-size:13px}
+th{background:#f4f5f8}
+.table-wrap{overflow-x:auto}
+.badge{padding:5px 9px;border-radius:20px;background:#eaf0f8;font-size:11px}
+.empty{text-align:center;color:#777;padding:25px}
+.hidden{display:none}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.container{padding:12px}}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Gestion complète des événements de l'AJADD-TOGO</p>
+</header>
+
+<div class="container">
+
+<div class="top">
+<div>
+<h2>Gestion des événements</h2>
+<p>Créer, organiser et suivre toutes les activités.</p>
+</div>
+<button class="primary" onclick="nouvelEvenement()">+ Créer un événement</button>
+</div>
+
+<div class="stats">
+<div class="stat">Total événements<strong id="total">0</strong></div>
+<div class="stat">En préparation<strong id="preparation">0</strong></div>
+<div class="stat">En cours<strong id="encours">0</strong></div>
+<div class="stat">Terminés<strong id="termines">0</strong></div>
+</div>
+
+<div class="card hidden" id="formulaire">
+<h3 id="titreForm">Créer un nouvel événement</h3>
+<br>
+
+<form id="eventForm">
+<div class="form-grid">
+
+<div class="field">
+<label>Nom de l'événement *</label>
+<input id="nom" required placeholder="Ex : AJADD TOP MODEL">
+</div>
+
+<div class="field">
+<label>Catégorie *</label>
+<select id="categorie" required>
+<option value="">Choisir une catégorie</option>
+<option>Concours / Miss / Mannequinat</option>
+<option>Foire / Exposition</option>
+<option>Formation</option>
+<option>Conférence / Meeting</option>
+<option>Soirée / Spectacle</option>
+<option>Culture / Festival</option>
+<option>Activité sociale</option>
+<option>Autre</option>
+</select>
+</div>
+
+<div class="field full">
+<label>Thème ou slogan</label>
+<input id="theme" placeholder="Thème de l'événement">
+</div>
+
+<div class="field full">
+<label>Description et objectifs</label>
+<textarea id="description" placeholder="Présentez l'événement et ses objectifs"></textarea>
+</div>
+
+<div class="field">
+<label>Date de début *</label>
+<input type="date" id="dateDebut" required>
+</div>
+
+<div class="field">
+<label>Date de fin *</label>
+<input type="date" id="dateFin" required>
+</div>
+
+<div class="field">
+<label>Heure de début</label>
+<input type="time" id="heureDebut">
+</div>
+
+<div class="field">
+<label>Heure de fin</label>
+<input type="time" id="heureFin">
+</div>
+
+<div class="field">
+<label>Lieu de l'événement *</label>
+<input id="lieu" required placeholder="Ville, salle ou espace">
+</div>
+
+<div class="field">
+<label>Responsable principal</label>
+<input id="responsable" placeholder="Nom du responsable">
+</div>
+
+<div class="field">
+<label>Nombre de participants attendus</label>
+<input type="number" id="participants" min="0" value="0">
+</div>
+
+<div class="field">
+<label>Statut</label>
+<select id="statut">
+<option>En préparation</option>
+<option>En cours</option>
+<option>Terminé</option>
+<option>Annulé</option>
+</select>
+</div>
+
+<div class="field full">
+<label>Observations</label>
+<textarea id="observations" placeholder="Informations complémentaires"></textarea>
+</div>
+
+</div>
+
+<div class="actions">
+<button type="submit" class="primary">Enregistrer l'événement</button>
+<button type="button" class="secondary" onclick="fermerFormulaire()">Annuler</button>
+</div>
+</form>
+</div>
+
+<div class="card">
+<h3>Liste des événements</h3>
+<br>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Événement</th>
+<th>Catégorie</th>
+<th>Date</th>
+<th>Lieu</th>
+<th>Responsable</th>
+<th>Statut</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="listeEvenements"></tbody>
+</table>
+</div>
+</div>
+
+<div class="actions">
+<button class="secondary" onclick="location.href='dashboard.html'">← Retour au tableau de bord</button>
+</div>
+
+</div>
+
+<script>
+const CLE = "ajaddEvenements";
+let evenementEnModification = null;
+
+function obtenirEvenements(){
+    try {
+        const donnees = JSON.parse(localStorage.getItem(CLE) || "[]");
+        return Array.isArray(donnees) ? donnees : [];
+    } catch(e) {
+        return [];
+    }
+}
+
+function sauvegarderEvenements(liste){
+    localStorage.setItem(CLE, JSON.stringify(liste));
+}
+
+function nouvelEvenement(){
+    evenementEnModification = null;
+    document.getElementById("eventForm").reset();
+    document.getElementById("titreForm").textContent = "Créer un nouvel événement";
+    document.getElementById("formulaire").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function fermerFormulaire(){
+    document.getElementById("formulaire").classList.add("hidden");
+    evenementEnModification = null;
+}
+
+document.getElementById("eventForm").addEventListener("submit",function(e){
+    e.preventDefault();
+
+    const debut = document.getElementById("dateDebut").value;
+    const fin = document.getElementById("dateFin").value;
+
+    if(fin < debut){
+        alert("La date de fin ne peut pas être antérieure à la date de début.");
+        return;
+    }
+
+    const evenement = {
+        id: evenementEnModification || ("EVT-" + Date.now()),
+        nom: document.getElementById("nom").value.trim(),
+        categorie: document.getElementById("categorie").value,
+        theme: document.getElementById("theme").value,
+        description: document.getElementById("description").value,
+        dateDebut: debut,
+        dateFin: fin,
+        heureDebut: document.getElementById("heureDebut").value,
+        heureFin: document.getElementById("heureFin").value,
+        lieu: document.getElementById("lieu").value,
+        responsable: document.getElementById("responsable").value,
+        participants: Number(document.getElementById("participants").value || 0),
+        statut: document.getElementById("statut").value,
+        observations: document.getElementById("observations").value
+    };
+
+    let liste = obtenirEvenements();
+
+    if(evenementEnModification){
+        liste = liste.map(ev => ev.id === evenementEnModification ? evenement : ev);
+    } else {
+        liste.push(evenement);
+    }
+
+    sauvegarderEvenements(liste);
+    fermerFormulaire();
+    afficherEvenements();
+    alert("Événement enregistré avec succès !");
+});
+
+function modifierEvenement(id){
+    const ev = obtenirEvenements().find(x => x.id === id);
+    if(!ev) return;
+
+    evenementEnModification = id;
+    document.getElementById("titreForm").textContent = "Modifier l'événement";
+
+    const champs = ["nom","categorie","theme","description","dateDebut","dateFin","heureDebut","heureFin","lieu","responsable","participants","statut","observations"];
+    champs.forEach(c => document.getElementById(c).value = ev[c] ?? "");
+
+    document.getElementById("formulaire").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function supprimerEvenement(id){
+    if(!confirm("Voulez-vous vraiment supprimer cet événement ?")) return;
+
+    const liste = obtenirEvenements().filter(ev => ev.id !== id);
+    sauvegarderEvenements(liste);
+    afficherEvenements();
+}
+
+function afficherEvenements(){
+    const liste = obtenirEvenements();
+    const tableau = document.getElementById("listeEvenements");
+
+    document.getElementById("total").textContent = liste.length;
+    document.getElementById("preparation").textContent = liste.filter(e => e.statut === "En préparation").length;
+    document.getElementById("encours").textContent = liste.filter(e => e.statut === "En cours").length;
+    document.getElementById("termines").textContent = liste.filter(e => e.statut === "Terminé").length;
+
+    if(liste.length === 0){
+        tableau.innerHTML = '<tr><td colspan="7" class="empty">Aucun événement enregistré pour le moment.</td></tr>';
+        return;
+    }
+
+    tableau.innerHTML = liste.map(ev => `
+        <tr>
+        <td><strong>${echapper(ev.nom)}</strong><br><small>${echapper(ev.theme || "")}</small></td>
+        <td>${echapper(ev.categorie)}</td>
+        <td>${echapper(ev.dateDebut)}<br>au ${echapper(ev.dateFin)}</td>
+        <td>${echapper(ev.lieu)}</td>
+        <td>${echapper(ev.responsable || "Non renseigné")}</td>
+        <td><span class="badge">${echapper(ev.statut)}</span></td>
+        <td>
+        <button class="secondary" onclick="modifierEvenement('${ev.id}')">Modifier</button>
+        <button class="danger" onclick="supprimerEvenement('${ev.id}')">Supprimer</button>
+        </td>
+        </tr>
+    `).join("");
+}
+
+function echapper(valeur){
+    return String(valeur ?? "").replace(/[&<>"']/g, function(c){
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+}
+
+afficherEvenements();
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>

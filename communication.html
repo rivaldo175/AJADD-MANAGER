@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Communication</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f5f9;color:#202938}
+header{background:#102c50;color:white;padding:22px}
+header h1{font-size:23px;margin-bottom:7px}
+header p{color:#d7e3f3}
+main{max-width:1200px;margin:auto;padding:20px}
+.back{display:inline-block;margin-bottom:18px;color:#174b83;text-decoration:none;font-weight:bold}
+h2{font-size:19px;margin:22px 0 13px}
+.panel,.stat{background:white;padding:18px;border-radius:12px;box-shadow:0 2px 8px #0000000c}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px}
+.stat p{font-size:13px;color:#64748b;margin-bottom:9px}
+.stat strong{font-size:23px}
+.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+label{display:block;font-size:13px;font-weight:bold;margin:12px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd4df;border-radius:7px;font-size:14px;background:white}
+textarea{min-height:110px;resize:vertical}
+button{border:0;border-radius:7px;padding:11px 15px;background:#174b83;color:white;font-weight:bold;cursor:pointer;margin-top:12px}
+button:hover{opacity:.9}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tools input{max-width:350px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:750px}
+th,td{padding:12px 9px;border-bottom:1px solid #e5eaf0;text-align:left;font-size:13px}
+th{background:#f0f4f9}
+.actions{display:flex;gap:5px}
+.actions button{margin:0;padding:7px 9px;font-size:12px}
+.delete{background:#bd3535}
+.publish{background:#16834a}
+.edit{background:#bd8121}
+.message{padding:15px;border:1px solid #e5eaf0;border-radius:9px;margin-bottom:12px;background:#fff}
+.message h3{font-size:16px;margin-bottom:8px;color:#174b83}
+.message p{font-size:14px;line-height:1.5;margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.message small{color:#64748b}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#e8eff8;color:#174b83;font-size:11px}
+.notice{background:#fff7df;padding:13px;border-radius:8px;color:#765515;font-size:13px;margin-top:16px}
+footer{text-align:center;color:#718096;padding:25px;font-size:12px}
+@media(max-width:600px){main{padding:12px}header{padding:18px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>AJADD MANAGER</h1>
+<p>Communication officielle et interne</p>
+</header>
+
+<main>
+<a class="back" href="dashboard.html">← Retour au tableau de bord</a>
+
+<h2>Tableau de bord Communication</h2>
+<div class="stats">
+<div class="stat"><p>TOTAL DES PUBLICATIONS</p><strong id="total">0</strong></div>
+<div class="stat"><p>PUBLICATIONS PUBLIÉES</p><strong id="publiees">0</strong></div>
+<div class="stat"><p>BROUILLONS</p><strong id="brouillons">0</strong></div>
+<div class="stat"><p>ANNONCES NATIONALES</p><strong id="nationales">0</strong></div>
+</div>
+
+<h2>Créer une communication</h2>
+<div class="panel">
+<form id="formCommunication">
+<div class="forms">
+<div>
+<label>Titre de la communication *</label>
+<input id="titre" required placeholder="Ex : Réunion nationale AJADD-TOGO">
+</div>
+<div>
+<label>Type de communication *</label>
+<select id="type" required>
+<option value="">Choisir le type</option>
+<option>Annonce officielle</option>
+<option>Communiqué</option>
+<option>Note interne</option>
+<option>Information régionale</option>
+<option>Publication départementale</option>
+<option>Invitation</option>
+<option>Appel à candidatures</option>
+<option>Message de sensibilisation</option>
+<option>Autre</option>
+</select>
+</div>
+<div>
+<label>Service émetteur</label>
+<select id="service">
+<option>Direction générale nationale</option>
+<option>Bureau exécutif national</option>
+<option>Conseil d'administration</option>
+<option>Secrétariat général</option>
+<option>Département national</option>
+<option>Bureau régional</option>
+<option>Autre</option>
+</select>
+</div>
+<div>
+<label>Destinataires *</label>
+<select id="destinataires" required>
+<option value="Tous les membres">Tous les membres</option>
+<option value="Direction générale">Direction générale</option>
+<option value="Bureau exécutif national">Bureau exécutif national</option>
+<option value="Bureaux régionaux">Bureaux régionaux</option>
+<option value="Départements nationaux">Départements nationaux</option>
+<option value="Partenaires">Partenaires</option>
+<option value="Grand public">Grand public</option>
+</select>
+</div>
+<div>
+<label>Région concernée</label>
+<select id="region">
+<option value="Toutes les régions">Toutes les régions</option>
+<option>Maritime</option>
+<option>Plateaux</option>
+<option>Centrale</option>
+<option>Kara</option>
+<option>Savanes</option>
+</select>
+</div>
+<div>
+<label>Date de publication</label>
+<input type="date" id="date">
+</div>
+<div>
+<label>Statut</label>
+<select id="statut">
+<option value="Brouillon">Brouillon</option>
+<option value="Publié">Publié</option>
+</select>
+</div>
+</div>
+
+<label>Contenu du message *</label>
+<textarea id="contenu" required placeholder="Rédige ici le contenu de la communication..."></textarea>
+
+<label>Signature / Responsable</label>
+<input id="signature" placeholder="Ex : La Direction générale nationale">
+
+<button type="submit" id="boutonEnregistrer">Enregistrer la communication</button>
+<button type="button" id="annulerModification" style="display:none;background:#64748b">Annuler la modification</button>
+</form>
+</div>
+
+<h2>Historique des communications</h2>
+<div class="panel">
+<div class="tools">
+<input id="recherche" placeholder="Rechercher une communication...">
+<select id="filtreStatut">
+<option value="">Tous les statuts</option>
+<option value="Publié">Publiées</option>
+<option value="Brouillon">Brouillons</option>
+</select>
+<select id="filtreType">
+<option value="">Tous les types</option>
+<option>Annonce officielle</option>
+<option>Communiqué</option>
+<option>Note interne</option>
+<option>Information régionale</option>
+<option>Publication départementale</option>
+<option>Invitation</option>
+<option>Appel à candidatures</option>
+<option>Message de sensibilisation</option>
+<option>Autre</option>
+</select>
+</div>
+<div id="listeCommunications"></div>
+<p id="vide" style="padding:15px;color:#64748b;display:none">Aucune communication enregistrée.</p>
+</div>
+
+<div class="notice">
+Les communications sont enregistrées dans le navigateur de cet ordinateur. Dans cette première version, leur publication est une gestion interne : elles ne sont pas encore envoyées automatiquement aux membres ou sur les réseaux sociaux.
+</div>
+</main>
+
+<footer>AJADD-TOGO — Amical des Jeunes Ambitieux et Dynamiques pour le Développement</footer>
+
+<script>
+const CLE_COMMUNICATION="ajaddCommunications";
+
+function lire(){
+try{
+const d=JSON.parse(localStorage.getItem(CLE_COMMUNICATION));
+return Array.isArray(d)?d:[];
+}catch(e){return [];}
+}
+
+let communications=lire();
+let modificationId=null;
+
+function sauvegarder(){
+try{
+localStorage.setItem(CLE_COMMUNICATION,JSON.stringify(communications));
+return true;
+}catch(e){
+alert("Impossible d'enregistrer. Le stockage du navigateur est peut-être plein.");
+return false;
+}
+}
+
+function echapper(v){
+return String(v??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+})[c]);
+}
+
+function afficher(){
+document.getElementById("total").textContent=communications.length;
+document.getElementById("publiees").textContent=communications.filter(c=>c.statut==="Publié").length;
+document.getElementById("brouillons").textContent=communications.filter(c=>c.statut==="Brouillon").length;
+document.getElementById("nationales").textContent=communications.filter(c=>c.region==="Toutes les régions").length;
+
+const recherche=document.getElementById("recherche").value.toLowerCase();
+const statut=document.getElementById("filtreStatut").value;
+const type=document.getElementById("filtreType").value;
+
+const resultat=communications.filter(c=>{
+const texte=[c.titre,c.contenu,c.type,c.service,c.destinataires,c.region].join(" ").toLowerCase();
+return texte.includes(recherche)&&(!statut||c.statut===statut)&&(!type||c.type===type);
+}).slice().reverse();
+
+document.getElementById("vide").style.display=resultat.length?"none":"block";
+
+document.getElementById("listeCommunications").innerHTML=resultat.map(c=>`
+<div class="message">
+<h3>${echapper(c.titre)}</h3>
+<span class="badge">${echapper(c.type)}</span>
+<span class="badge">${echapper(c.statut)}</span>
+<p>${echapper(c.contenu)}</p>
+<small>
+Émetteur : ${echapper(c.service)} |
+Destinataires : ${echapper(c.destinataires)} |
+Région : ${echapper(c.region)} |
+Date : ${echapper(c.date||"Non précisée")}
+</small>
+<br><small>Signature : ${echapper(c.signature||"Non précisée")}</small>
+<div class="actions" style="margin-top:10px">
+<button class="publish" onclick="changerStatut('${c.id}')">${c.statut==="Publié"?"Remettre en brouillon":"Publier"}</button>
+<button class="edit" onclick="modifier('${c.id}')">Modifier</button>
+<button onclick="imprimer('${c.id}')">Imprimer</button>
+<button class="delete" onclick="supprimer('${c.id}')">Supprimer</button>
+</div>
+</div>`).join("");
+}
+
+document.getElementById("formCommunication").addEventListener("submit",function(e){
+e.preventDefault();
+
+const donnees={
+titre:document.getElementById("titre").value.trim(),
+type:document.getElementById("type").value,
+service:document.getElementById("service").value,
+destinataires:document.getElementById("destinataires").value,
+region:document.getElementById("region").value,
+date:document.getElementById("date").value,
+statut:document.getElementById("statut").value,
+contenu:document.getElementById("contenu").value.trim(),
+signature:document.getElementById("signature").value.trim()
+};
+
+if(modificationId){
+const index=communications.findIndex(c=>c.id===modificationId);
+if(index===-1)return;
+communications[index]={...communications[index],...donnees};
+}else{
+communications.push({id:"COM-"+Date.now(),...donnees});
+}
+
+if(!sauvegarder())return;
+
+this.reset();
+modificationId=null;
+document.getElementById("boutonEnregistrer").textContent="Enregistrer la communication";
+document.getElementById("annulerModification").style.display="none";
+afficher();
+alert("Communication enregistrée avec succès !");
+});
+
+function modifier(id){
+const c=communications.find(x=>x.id===id);
+if(!c)return;
+
+modificationId=id;
+document.getElementById("titre").value=c.titre;
+document.getElementById("type").value=c.type;
+document.getElementById("service").value=c.service;
+document.getElementById("destinataires").value=c.destinataires;
+document.getElementById("region").value=c.region;
+document.getElementById("date").value=c.date;
+document.getElementById("statut").value=c.statut;
+document.getElementById("contenu").value=c.contenu;
+document.getElementById("signature").value=c.signature;
+document.getElementById("boutonEnregistrer").textContent="Enregistrer les modifications";
+document.getElementById("annulerModification").style.display="inline-block";
+document.getElementById("titre").focus();
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.getElementById("annulerModification").addEventListener("click",function(){
+modificationId=null;
+document.getElementById("formCommunication").reset();
+document.getElementById("boutonEnregistrer").textContent="Enregistrer la communication";
+this.style.display="none";
+});
+
+function changerStatut(id){
+const c=communications.find(x=>x.id===id);
+if(!c)return;
+c.statut=c.statut==="Publié"?"Brouillon":"Publié";
+if(sauvegarder())afficher();
+}
+
+function supprimer(id){
+if(!confirm("Voulez-vous vraiment supprimer cette communication ?"))return;
+const anciennes=communications;
+communications=communications.filter(c=>c.id!==id);
+if(sauvegarder())afficher();
+else communications=anciennes;
+}
+
+function imprimer(id){
+const c=communications.find(x=>x.id===id);
+if(!c)return;
+const fenetre=window.open("","_blank");
+if(!fenetre){
+alert("Autorise les fenêtres contextuelles pour imprimer.");
+return;
+}
+fenetre.document.write(`
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>${echapper(c.titre)}</title>
+<style>
+body{font-family:Arial,sans-serif;margin:50px;color:#222}
+h1{text-align:center;color:#102c50}
+h2{margin:35px 0 20px}
+p{white-space:pre-wrap;line-height:1.7}
+small{color:#555}
+.signature{margin-top:45px;text-align:right}
+</style></head><body>
+<h1>AJADD-TOGO</h1>
+<p style="text-align:center">Amical des Jeunes Ambitieux et Dynamiques pour le Développement</p>
+<hr style="margin:25px 0">
+<h2>${echapper(c.titre)}</h2>
+<p><strong>${echapper(c.type)}</strong></p>
+<p>${echapper(c.contenu)}</p>
+<p><small>Date : ${echapper(c.date||"Non précisée")} | Destinataires : ${echapper(c.destinataires)}</small></p>
+<div class="signature"><p>${echapper(c.signature||"AJADD-TOGO")}</p></div>
+<script>window.onload=()=>window.print();<\/script>
+</body></html>`);
+fenetre.document.close();
+}
+
+document.getElementById("recherche").addEventListener("input",afficher);
+document.getElementById("filtreStatut").addEventListener("change",afficher);
+document.getElementById("filtreType").addEventListener("change",afficher);
+
+afficher();
+</script>
+<script src="protection.js"></script>
+</body>
+</html>

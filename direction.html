@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJADD MANAGER - Direction générale</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f3f5f8;
+    color: #17263b;
+}
+
+header {
+    background: #071b36;
+    color: white;
+    padding: 20px;
+    border-bottom: 4px solid #d5aa42;
+}
+
+header h1 {
+    font-size: 23px;
+}
+
+header p {
+    color: #e6c46d;
+    margin-top: 6px;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 15px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+button {
+    border: none;
+    padding: 11px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.back {
+    background: #071b36;
+    color: white;
+}
+
+.form-box, .table-box {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+}
+
+h2 {
+    color: #071b36;
+    margin-bottom: 18px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 7px;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd3dc;
+    border-radius: 6px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #bd902c;
+}
+
+.submit {
+    margin-top: 18px;
+    background: #bd902c;
+    color: white;
+}
+
+.cancel {
+    margin-top: 18px;
+    background: #68778a;
+    color: white;
+    display: none;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    padding: 13px;
+    text-align: left;
+    border-bottom: 1px solid #e3e7ec;
+}
+
+th {
+    background: #071b36;
+    color: white;
+}
+
+.edit {
+    background: #e6c46d;
+    margin: 3px;
+}
+
+.delete {
+    background: #c0392b;
+    color: white;
+    margin: 3px;
+}
+
+.empty {
+    color: #68778a;
+    text-align: center;
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #68778a;
+    font-size: 12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>AJADD MANAGER</h1>
+    <p>Direction générale nationale</p>
+</header>
+
+<main>
+
+    <div class="topbar">
+        <h2>Gestion de la Direction générale</h2>
+        <button class="back" onclick="location.href='dashboard.html'">
+            ← Retour au tableau de bord
+        </button>
+    </div>
+
+    <section class="form-box">
+
+        <h2 id="formTitle">Enregistrer un dirigeant national</h2>
+
+        <form id="directionForm">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Poste occupé *</label>
+                    <select id="poste" required>
+                        <option value="">Choisir un poste</option>
+                        <option value="PDG">PDG - Président-Directeur Général</option>
+                        <option value="DG">DG - Directeur Général</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Nom *</label>
+                    <input type="text" id="nom" required>
+                </div>
+
+                <div>
+                    <label>Prénoms *</label>
+                    <input type="text" id="prenoms" required>
+                </div>
+
+                <div>
+                    <label>Téléphone</label>
+                    <input type="tel" id="telephone">
+                </div>
+
+                <div>
+                    <label>Adresse e-mail</label>
+                    <input type="email" id="email">
+                </div>
+
+                <div>
+                    <label>Date de nomination</label>
+                    <input type="date" id="dateNomination">
+                </div>
+
+                <div>
+                    <label>Statut</label>
+                    <select id="statut">
+                        <option value="En fonction">En fonction</option>
+                        <option value="Suspendu">Suspendu</option>
+                        <option value="Fin de mandat">Fin de mandat</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="submit" id="submitBtn">
+                Enregistrer
+            </button>
+
+            <button type="button" class="cancel" id="cancelBtn"
+                onclick="annulerModification()">
+                Annuler la modification
+            </button>
+
+        </form>
+
+    </section>
+
+    <section class="table-box">
+
+        <h2>Composition de la Direction générale nationale</h2>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Poste</th>
+                        <th>Nom complet</th>
+                        <th>Téléphone</th>
+                        <th>Date de nomination</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="directionTable"></tbody>
+            </table>
+        </div>
+
+        <p id="messageVide" class="empty">
+            Aucun dirigeant national enregistré pour le moment.
+        </p>
+
+    </section>
+
+</main>
+
+<footer>
+    AJADD-TOGO © 2026 — Direction générale nationale
+</footer>
+
+<script>
+
+const CLE = "ajaddDirection";
+
+let indexModification = -1;
+
+function lireDirection() {
+    try {
+        return JSON.parse(localStorage.getItem(CLE)) || [];
+    } catch (erreur) {
+        return [];
+    }
+}
+
+function enregistrerDirection(donnees) {
+    localStorage.setItem(CLE, JSON.stringify(donnees));
+}
+
+function afficherDirection() {
+
+    const liste = lireDirection();
+    const tableau = document.getElementById("directionTable");
+    const messageVide = document.getElementById("messageVide");
+
+    tableau.innerHTML = "";
+
+    messageVide.style.display =
+        liste.length === 0 ? "block" : "none";
+
+    liste.forEach((personne, index) => {
+
+        const ligne = document.createElement("tr");
+
+        const poste = document.createElement("td");
+        poste.textContent = personne.poste;
+
+        const nom = document.createElement("td");
+        nom.textContent = personne.nom + " " + personne.prenoms;
+
+        const telephone = document.createElement("td");
+        telephone.textContent = personne.telephone || "-";
+
+        const date = document.createElement("td");
+        date.textContent = personne.dateNomination || "-";
+
+        const statut = document.createElement("td");
+        statut.textContent = personne.statut;
+
+        const actions = document.createElement("td");
+
+        const modifier = document.createElement("button");
+        modifier.textContent = "Modifier";
+        modifier.className = "edit";
+        modifier.addEventListener("click", () => modifierDirection(index));
+
+        const supprimer = document.createElement("button");
+        supprimer.textContent = "Supprimer";
+        supprimer.className = "delete";
+        supprimer.addEventListener("click", () => supprimerDirection(index));
+
+        actions.append(modifier, supprimer);
+        ligne.append(poste, nom, telephone, date, statut, actions);
+        tableau.appendChild(ligne);
+    });
+}
+
+document.getElementById("directionForm")
+.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const liste = lireDirection();
+
+    const personne = {
+        poste: document.getElementById("poste").value,
+        nom: document.getElementById("nom").value.trim(),
+        prenoms: document.getElementById("prenoms").value.trim(),
+        telephone: document.getElementById("telephone").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        dateNomination: document.getElementById("dateNomination").value,
+        statut: document.getElementById("statut").value
+    };
+
+    if (!personne.nom || !personne.prenoms || !personne.poste) {
+        alert("Veuillez remplir les champs obligatoires.");
+        return;
+    }
+
+    const posteOccupe = liste.some((element, index) =>
+        element.poste === personne.poste &&
+        element.statut === "En fonction" &&
+        index !== indexModification
+    );
+
+    if (posteOccupe && personne.statut === "En fonction") {
+        alert("Ce poste est déjà occupé par un dirigeant en fonction.");
+        return;
+    }
+
+    if (indexModification === -1) {
+        liste.push(personne);
+        alert("Dirigeant enregistré avec succès.");
+    } else {
+        liste[indexModification] = personne;
+        alert("Informations modifiées avec succès.");
+    }
+
+    enregistrerDirection(liste);
+    annulerModification();
+    afficherDirection();
+});
+
+function modifierDirection(index) {
+
+    const personne = lireDirection()[index];
+
+    document.getElementById("poste").value = personne.poste;
+    document.getElementById("nom").value = personne.nom;
+    document.getElementById("prenoms").value = personne.prenoms;
+    document.getElementById("telephone").value = personne.telephone;
+    document.getElementById("email").value = personne.email;
+    document.getElementById("dateNomination").value = personne.dateNomination;
+    document.getElementById("statut").value = personne.statut;
+
+    indexModification = index;
+
+    document.getElementById("formTitle").textContent =
+        "Modifier les informations du dirigeant";
+
+    document.getElementById("submitBtn").textContent =
+        "Enregistrer les modifications";
+
+    document.getElementById("cancelBtn").style.display = "inline-block";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function annulerModification() {
+
+    indexModification = -1;
+
+    document.getElementById("directionForm").reset();
+
+    document.getElementById("formTitle").textContent =
+        "Enregistrer un dirigeant national";
+
+    document.getElementById("submitBtn").textContent = "Enregistrer";
+
+    document.getElementById("cancelBtn").style.display = "none";
+}
+
+function supprimerDirection(index) {
+
+    if (!confirm("Voulez-vous vraiment supprimer ce dirigeant ?")) {
+        return;
+    }
+
+    const liste = lireDirection();
+    liste.splice(index, 1);
+
+    enregistrerDirection(liste);
+    afficherDirection();
+}
+
+afficherDirection();
+
+</script>
+
+<script src="protection.js"></script>
+</body>
+</html>
