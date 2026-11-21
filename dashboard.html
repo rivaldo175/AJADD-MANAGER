@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AJADD MANAGER - Tableau de bord</title>
 
+    <!-- Configuration et protection -->
+    <script src="appwrite.js"></script>
+    <script src="protection.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -209,49 +213,6 @@
             .profil { text-align: left; }
         }
     </style>
-
-    <!-- Vérification de la connexion avant l'affichage -->
-    <script>
-    (function () {
-        document.documentElement.style.visibility = "hidden";
-
-        function rediriger() {
-            sessionStorage.removeItem("ajaddSession");
-            window.location.replace("index.html");
-        }
-
-        try {
-            const session = JSON.parse(
-                sessionStorage.getItem("ajaddSession") || "null"
-            );
-
-            if (!session || !session.identifiant) {
-                rediriger();
-                return;
-            }
-
-            const utilisateurs = JSON.parse(
-                localStorage.getItem("ajaddUtilisateurs") || "[]"
-            );
-
-            const utilisateur = utilisateurs.find(
-                u => u.identifiant === session.identifiant
-            );
-
-            if (!utilisateur || utilisateur.statut !== "actif") {
-                rediriger();
-                return;
-            }
-
-            window.ajaddUtilisateurConnecte = utilisateur;
-
-            document.documentElement.style.visibility = "visible";
-
-        } catch (erreur) {
-            rediriger();
-        }
-    })();
-    </script>
 </head>
 
 <body>
@@ -264,7 +225,8 @@
 
     <div class="profil">
         <div id="nomConnecte">Responsable connecté</div>
-        <div id="fonctionConnectee" style="font-size:13px;margin-top:5px;color:#d7eadf;">
+        <div id="fonctionConnectee"
+             style="font-size:13px;margin-top:5px;color:#d7eadf;">
             Fonction
         </div>
 
@@ -279,7 +241,8 @@
 
         <a href="dashboard.html" class="active">🏠 Tableau de bord</a>
 
-        <a href="utilisateurs.html" id="lienUtilisateurs" style="display:none;">
+        <a href="utilisateurs.html" id="lienUtilisateurs"
+           style="display:none;">
             🔐 Gestion des utilisateurs
         </a>
 
@@ -444,27 +407,51 @@
 </footer>
 
 <script>
+(function () {
+    "use strict";
+
     const utilisateur = window.ajaddUtilisateurConnecte;
+
+    // Vérification de la session
+    if (!utilisateur || !utilisateur.userId || !utilisateur.role) {
+        sessionStorage.removeItem("ajaddSession");
+        window.location.replace("index.html");
+        return;
+    }
 
     // Afficher le profil connecté
     document.getElementById("nomConnecte").textContent =
-        utilisateur.nom || utilisateur.identifiant;
+        utilisateur.nom || utilisateur.identifiant || "Utilisateur";
 
     document.getElementById("fonctionConnectee").textContent =
         utilisateur.fonction || utilisateur.role || "Responsable";
 
     // Déconnexion
-    function deconnecter() {
-        if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
-            sessionStorage.removeItem("ajaddSession");
-            window.location.replace("index.html");
+    window.deconnecter = async function () {
+        if (!confirm("Voulez-vous vraiment vous déconnecter ?")) {
+            return;
         }
-    }
 
-    // Vérifier les rôles
-    const estPDG = utilisateur.role === "administrateur_principal";
-    const estDG = utilisateur.role === "directrice_generale";
-    const accesTotal = estPDG || estDG || utilisateur.accesTotal === true;
+        try {
+            if (window.ajaddAccount) {
+                await window.ajaddAccount.deleteSession("current");
+            }
+        } catch (erreur) {
+            console.warn("La session Appwrite était déjà fermée :", erreur);
+        }
+
+        sessionStorage.removeItem("ajaddSession");
+        window.location.replace("index.html");
+    };
+
+    // Vérifier les rôles Appwrite
+    const role = String(utilisateur.role || "").toLowerCase();
+
+    const estPDG = role === "pdg";
+    const estDG = role === "dg";
+
+    const accesTotal = estPDG || estDG ||
+                       utilisateur.accesTotal === true;
 
     // Le PDG seul peut gérer les utilisateurs
     if (estPDG) {
@@ -503,16 +490,28 @@
 
     // Lire les permissions du compte
     function obtenirPermissions() {
-        const source = utilisateur.permissions ||
-                       utilisateur.modulesAutorises ||
-                       utilisateur.accesModules ||
-                       [];
+        let source = utilisateur.permissions ||
+                     utilisateur.modulesAutorises ||
+                     utilisateur.accesModules ||
+                     [];
+
+        if (typeof source === "string") {
+            try {
+                source = JSON.parse(source);
+            } catch (erreur) {
+                source = [];
+            }
+        }
 
         if (Array.isArray(source)) {
             return source.map(normaliser);
         }
 
         if (source && typeof source === "object") {
+            if (source.tous === true) {
+                return ["tous"];
+            }
+
             return Object.keys(source)
                 .filter(cle => source[cle] === true)
                 .map(normaliser);
@@ -527,9 +526,13 @@
         if (fichier === "dashboard.html") return true;
         if (fichier === "utilisateurs.html") return estPDG;
         if (accesTotal) return true;
+        if (permissions.includes("tous")) return true;
 
         const aliases = aliasPermissions[fichier] || [];
-        const valeurs = [normaliser(fichier), ...aliases.map(normaliser)];
+        const valeurs = [
+            normaliser(fichier),
+            ...aliases.map(normaliser)
+        ];
 
         return valeurs.some(valeur => permissions.includes(valeur));
     }
@@ -585,7 +588,6 @@
 
     // Actualiser les statistiques
     function actualiserTableauDeBord() {
-
         const membres = lireDonnees("ajaddMembers");
         const departements = lireDonnees("ajaddDepartments");
         const regions = lireDonnees("ajaddRegions");
@@ -612,7 +614,10 @@
             .filter(o => o.type === "depense")
             .reduce((total, o) => total + Number(o.montant || 0), 0);
 
-        afficherNombre("soldeFinance", montantFCFA(recettes - depenses));
+        afficherNombre(
+            "soldeFinance",
+            montantFCFA(recettes - depenses)
+        );
 
         const documents = lireDonnees("ajaddDocuments");
         afficherNombre("totalDocuments", documents.length);
@@ -630,9 +635,9 @@
 
     window.addEventListener("pageshow", actualiserTableauDeBord);
     window.addEventListener("storage", actualiserTableauDeBord);
+
+})();
 </script>
 
-    <script src="appwrite.js"></script>
-<script src="protection.js"></script>
 </body>
 </html>
