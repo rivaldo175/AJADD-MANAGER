@@ -101,6 +101,11 @@
             background: #b58b25;
         }
 
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
         .footer {
             margin-top: 25px;
             color: #777;
@@ -112,6 +117,7 @@
             margin-top: 15px;
             color: #b3261e;
             font-size: 13px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -141,11 +147,12 @@
         <form id="loginForm">
 
             <div class="form-group">
-                <label for="identifiant">Identifiant</label>
+                <label for="identifiant">Adresse e-mail</label>
+
                 <input
-                    type="text"
+                    type="email"
                     id="identifiant"
-                    placeholder="Votre identifiant"
+                    placeholder="Votre adresse e-mail"
                     autocomplete="username"
                     required
                 >
@@ -153,6 +160,7 @@
 
             <div class="form-group">
                 <label for="password">Mot de passe</label>
+
                 <input
                     type="password"
                     id="password"
@@ -177,44 +185,88 @@
 
     </div>
 
+    <!-- SDK APPWRITE -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@29.0.0"></script>
+
+    <!-- CONFIGURATION APPWRITE -->
+    <script src="appwrite.js"></script>
+
+    <!-- AUTHENTIFICATION AJADD -->
     <script>
-        document.getElementById("loginForm").addEventListener("submit", function(event) {
 
-            event.preventDefault();
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
 
-            const identifiant = document.getElementById("identifiant").value.trim();
-            const motDePasse = document.getElementById("password").value;
-            const message = document.getElementById("message");
+        event.preventDefault();
 
-            let utilisateurs = [];
+        const email = document.getElementById("identifiant").value.trim();
+        const motDePasse = document.getElementById("password").value;
 
-            try {
-                utilisateurs = JSON.parse(
-                    localStorage.getItem("ajaddUtilisateurs") || "[]"
-                );
-            } catch (erreur) {
-                utilisateurs = [];
+        const message = document.getElementById("message");
+        const bouton = document.querySelector(".login-button");
+
+        message.style.color = "#b3261e";
+        message.textContent = "Connexion en cours...";
+
+        bouton.disabled = true;
+
+        try {
+
+            // Vérifier la configuration Appwrite
+            if (!window.ajaddAccount || !window.ajaddTablesDB) {
+                throw new Error("Configuration Appwrite introuvable.");
             }
 
-            const utilisateur = utilisateurs.find(function(compte) {
-                return (
-                    compte.identifiant === identifiant &&
-                    compte.motDePasse === motDePasse &&
-                    compte.statut === "actif"
-                );
+            // 1. Connexion Appwrite Auth
+            await window.ajaddAccount.createEmailPasswordSession({
+                email: email,
+                password: motDePasse
             });
 
-            if (!utilisateur) {
-                message.textContent = "Identifiant ou mot de passe incorrect, ou compte inactif.";
-                return;
+            // 2. Récupérer l'utilisateur connecté
+            const utilisateur = await window.ajaddAccount.get();
+
+            // 3. Rechercher son profil dans AJADD
+            const resultat = await window.ajaddTablesDB.listRows({
+                databaseId: window.AJADD_DATABASE_ID,
+                tableId: window.AJADD_TABLES.profils_utilisateurs,
+                queries: [
+                    Appwrite.Query.equal("user_id", utilisateur.$id)
+                ]
+            });
+
+            if (!resultat.rows || resultat.rows.length === 0) {
+
+                await window.ajaddAccount.deleteSession({
+                    sessionId: "current"
+                });
+
+                throw new Error(
+                    "Aucun profil AJADD associé à ce compte."
+                );
             }
 
-            // Enregistrer la session locale
+            // 4. Récupérer le profil
+            const profil = resultat.rows[0];
+
+            // 5. Vérifier le statut
+            if (profil.statut !== "actif") {
+
+                await window.ajaddAccount.deleteSession({
+                    sessionId: "current"
+                });
+
+                throw new Error(
+                    "Ce compte est inactif. Contactez le PDG."
+                );
+            }
+
+            // 6. Préparer la session AJADD
             const session = {
-                identifiant: utilisateur.identifiant,
-                nom: utilisateur.nom,
-                fonction: utilisateur.fonction,
-                role: utilisateur.role,
+                userId: utilisateur.$id,
+                identifiant: profil.identifiant,
+                nom: profil.nom_complet,
+                fonction: profil.fonction,
+                role: profil.role,
                 dateConnexion: new Date().toISOString()
             };
 
@@ -223,16 +275,40 @@
                 JSON.stringify(session)
             );
 
+            // 7. Confirmer la connexion
             message.style.color = "green";
-            message.textContent = "Connexion réussie. Bienvenue !";
 
+            message.textContent =
+                "Connexion réussie. Bienvenue !";
+
+            // 8. Ouvrir le tableau de bord
             setTimeout(function() {
+
                 window.location.href = "dashboard.html";
+
             }, 800);
 
-        });
+        } catch (erreur) {
+
+            console.error(
+                "Erreur de connexion AJADD :",
+                erreur
+            );
+
+            message.style.color = "#b3261e";
+
+            message.textContent =
+                "Connexion impossible : " + erreur.message;
+
+        } finally {
+
+            bouton.disabled = false;
+
+        }
+
+    });
+
     </script>
-<script src="https://cdn.jsdelivr.net/npm/appwrite@29.0.0"></script>
-<script src="appwrite.js"></script>
+
 </body>
 </html>
