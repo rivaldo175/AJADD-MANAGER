@@ -7,39 +7,27 @@
     }
 
     let session;
-    let utilisateurs;
 
     try {
         session = JSON.parse(
             sessionStorage.getItem("ajaddSession") || "null"
-        );
-
-        utilisateurs = JSON.parse(
-            localStorage.getItem("ajaddUtilisateurs") || "[]"
         );
     } catch (erreur) {
         rediriger();
         return;
     }
 
-    if (!session || !session.identifiant) {
+    // Vérifier la session AJADD
+    if (!session || !session.userId || !session.role) {
         rediriger();
         return;
     }
 
-    const utilisateur = utilisateurs.find(
-        u => u.identifiant === session.identifiant
-    );
+    // Récupérer le rôle directement depuis le profil Appwrite
+    const role = String(session.role).toLowerCase();
 
-    if (!utilisateur || utilisateur.statut !== "actif") {
-        rediriger();
-        return;
-    }
-
-    const role = utilisateur.role;
-
-    const estPDG = role === "administrateur_principal";
-    const estDG = role === "directrice_generale";
+    const estPDG = role === "pdg";
+    const estDG = role === "dg";
 
     const accesTotal = estPDG || estDG;
 
@@ -59,7 +47,7 @@
         return;
     }
 
-    // Permissions des autres responsables
+    // Correspondance des modules
     const alias = {
         "direction.html": ["direction"],
         "bureau.html": ["bureau"],
@@ -89,16 +77,25 @@
     }
 
     function obtenirPermissions() {
-        const source = utilisateur.permissions ||
-            utilisateur.modulesAutorises ||
-            utilisateur.accesModules ||
-            [];
+        let source = session.permissions || [];
+
+        if (typeof source === "string") {
+            try {
+                source = JSON.parse(source);
+            } catch (erreur) {
+                source = [];
+            }
+        }
 
         if (Array.isArray(source)) {
             return source.map(normaliser);
         }
 
         if (source && typeof source === "object") {
+            if (source.tous === true) {
+                return ["tous"];
+            }
+
             return Object.keys(source)
                 .filter(cle => source[cle] === true)
                 .map(normaliser);
@@ -111,7 +108,10 @@
 
     function autorise(fichier) {
         if (fichier === "dashboard.html") return true;
+
         if (accesTotal) return true;
+
+        if (permissions.includes("tous")) return true;
 
         const valeurs = [
             normaliser(fichier),
@@ -127,7 +127,9 @@
         return;
     }
 
-    window.ajaddUtilisateurConnecte = utilisateur;
+    // Informations de l'utilisateur connecté
+    window.ajaddUtilisateurConnecte = session;
     window.ajaddEstPDG = estPDG;
     window.ajaddEstDG = estDG;
+
 })();
