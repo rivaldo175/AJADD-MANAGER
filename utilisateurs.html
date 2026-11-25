@@ -6,6 +6,8 @@
 <title>Gestion des utilisateurs | AJADD MANAGER</title>
 
 <script src="protection.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
+<script src="appwrite.js"></script>
 
 <style>
 * {
@@ -107,18 +109,13 @@ button {
     margin-top: 10px;
 }
 
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btn-primary {
     background: #172554;
-    color: white;
-}
-
-.btn-danger {
-    background: #dc2626;
-    color: white;
-}
-
-.btn-success {
-    background: #15803d;
     color: white;
 }
 
@@ -177,131 +174,162 @@ th {
 <header>
     <h2>AJADD MANAGER</h2>
     <p>Gestion des utilisateurs</p>
-    <a class="retour" href="dashboard.html">← Retour au tableau de bord</a>
+    <a class="retour" href="dashboard.html">
+        ← Retour au tableau de bord
+    </a>
 </header>
 
 <div class="container">
 
-<div class="card">
-    <h3>Créer un profil utilisateur</h3>
+    <div class="card">
+        <h3>Créer un profil utilisateur</h3>
 
-    <form id="formUtilisateur">
+        <form id="formUtilisateur">
 
-        <div class="form-grid">
+            <div class="form-grid">
 
-            <div class="field">
-                <label>Nom complet</label>
-                <input type="text" id="nom" required>
+                <div class="field">
+                    <label for="nom">Nom complet</label>
+                    <input type="text" id="nom" required>
+                </div>
+
+                <div class="field">
+                    <label for="identifiant">Identifiant</label>
+                    <input type="text" id="identifiant" required>
+                </div>
+
+                <div class="field">
+                    <label for="email">Adresse e-mail</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="field">
+                    <label for="fonction">Fonction</label>
+                    <input type="text" id="fonction" required>
+                </div>
+
+                <div class="field">
+                    <label for="role">Rôle</label>
+                    <select id="role" required>
+                        <option value="">Choisir un rôle</option>
+                        <option value="dg">Directeur Général</option>
+                        <option value="responsable">Responsable</option>
+                        <option value="membre">Membre</option>
+                        <option value="agent">Agent</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="statut">Statut</label>
+                    <select id="statut">
+                        <option value="actif">Actif</option>
+                        <option value="suspendu">Suspendu</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="motDePasse">Mot de passe provisoire</label>
+                    <input
+                        type="password"
+                        id="motDePasse"
+                        minlength="8"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <p class="note">Minimum 8 caractères.</p>
+                </div>
+
+                <div class="field">
+                    <label for="confirmation">
+                        Confirmer le mot de passe
+                    </label>
+                    <input
+                        type="password"
+                        id="confirmation"
+                        minlength="8"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+
             </div>
 
-            <div class="field">
-                <label>Identifiant</label>
-                <input type="text" id="identifiant" required>
+            <h3>Autorisations d'accès</h3>
+
+            <div class="permissions">
+
+                <label><input type="checkbox" value="direction"> Direction générale</label>
+
+                <label><input type="checkbox" value="bureau"> Bureau exécutif</label>
+
+                <label><input type="checkbox" value="departements"> Départements</label>
+
+                <label><input type="checkbox" value="responsables"> Responsables</label>
+
+                <label><input type="checkbox" value="membres"> Membres</label>
+
+                <label><input type="checkbox" value="regions"> Régions</label>
+
+                <label><input type="checkbox" value="responsablesregionaux"> Responsables régionaux</label>
+
+                <label><input type="checkbox" value="evenements"> Événements</label>
+
+                <label><input type="checkbox" value="projetsevenementiels"> Projets événementiels</label>
+
+                <label><input type="checkbox" value="budgetsevenements"> Budgets événements</label>
+
+                <label><input type="checkbox" value="formations"> Formations</label>
+
+                <label><input type="checkbox" value="commerces"> Commerces</label>
+
+                <label><input type="checkbox" value="partenaires"> Partenaires</label>
+
+                <label><input type="checkbox" value="finance"> Finances</label>
+
+                <label><input type="checkbox" value="budgets"> Budgets</label>
+
+                <label><input type="checkbox" value="documents"> Documents</label>
+
+                <label><input type="checkbox" value="communications"> Communications</label>
+
             </div>
 
-            <div class="field">
-                <label>Adresse e-mail</label>
-                <input type="email" id="email" required>
-            </div>
+            <button type="submit" class="btn-primary">
+                Enregistrer le profil
+            </button>
 
-            <div class="field">
-                <label>Fonction</label>
-                <input type="text" id="fonction" required>
-            </div>
+            <p id="message" class="message"></p>
 
-            <div class="field">
-                <label>Rôle</label>
-                <select id="role" required>
-                    <option value="">Choisir un rôle</option>
-                    <option value="dg">Directeur Général</option>
-                    <option value="responsable">Responsable</option>
-                    <option value="membre">Membre</option>
-                    <option value="agent">Agent</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Statut</label>
-                <select id="statut">
-                    <option value="actif">Actif</option>
-                    <option value="suspendu">Suspendu</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Mot de passe provisoire</label>
-                <input
-                    type="password"
-                    id="motDePasse"
-                    minlength="8"
-                    autocomplete="new-password"
-                    required
-                >
-                <p class="note">Minimum 8 caractères.</p>
-            </div>
-
-            <div class="field">
-                <label>Confirmer le mot de passe</label>
-                <input
-                    type="password"
-                    id="confirmation"
-                    minlength="8"
-                    autocomplete="new-password"
-                    required
-                >
-            </div>
-
-        </div>
-
-        <h3>Autorisations d'accès</h3>
-
-        <div class="permissions">
-            <label><input type="checkbox" value="direction"> Direction générale</label>
-            <label><input type="checkbox" value="bureau"> Bureau exécutif</label>
-            <label><input type="checkbox" value="departements"> Départements</label>
-            <label><input type="checkbox" value="responsables"> Responsables</label>
-            <label><input type="checkbox" value="membres"> Membres</label>
-            <label><input type="checkbox" value="regions"> Régions</label>
-            <label><input type="checkbox" value="responsablesregionaux"> Responsables régionaux</label>
-            <label><input type="checkbox" value="evenements"> Événements</label>
-            <label><input type="checkbox" value="projetsevenementiels"> Projets événementiels</label>
-            <label><input type="checkbox" value="budgetevenements"> Budgets événements</label>
-            <label><input type="checkbox" value="formations"> Formations</label>
-            <label><input type="checkbox" value="commerces"> Commerces</label>
-            <label><input type="checkbox" value="partenaires"> Partenaires</label>
-            <label><input type="checkbox" value="finance"> Finances</label>
-            <label><input type="checkbox" value="documents"> Documents</label>
-            <label><input type="checkbox" value="communication"> Communications</label>
-        </div>
-
-        <button type="submit" class="btn-primary">
-            Enregistrer le profil
-        </button>
-
-        <p id="message" class="message"></p>
-
-    </form>
-</div>
-
-<div class="card">
-    <h3>Liste des utilisateurs</h3>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Identifiant</th>
-                    <th>Fonction</th>
-                    <th>Rôle</th>
-                    <th>Statut</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="listeUtilisateurs"></tbody>
-        </table>
+        </form>
     </div>
-</div>
+
+    <div class="card">
+
+        <h3>Liste des utilisateurs</h3>
+
+        <div class="table-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Identifiant</th>
+                        <th>Fonction</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="listeUtilisateurs">
+                    <tr>
+                        <td colspan="6">Chargement...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
 
 </div>
 
@@ -329,106 +357,114 @@ th {
     const liste = document.getElementById("listeUtilisateurs");
     const message = document.getElementById("message");
 
-    function obtenirUtilisateurs() {
+    const DATABASE_ID = window.AJADD_DATABASE_ID;
+    const TABLE_ID = window.AJADD_TABLES.profils_utilisateurs;
+    const FUNCTION_ID = "ajadd-create-user";
+
+    if (
+        typeof Appwrite === "undefined" ||
+        !window.ajaddAppwriteClient ||
+        !window.ajaddTablesDB ||
+        !DATABASE_ID ||
+        !TABLE_ID
+    ) {
+        alert("Erreur de connexion à Appwrite. Vérifiez appwrite.js.");
+        return;
+    }
+
+    const functions = new Appwrite.Functions(
+        window.ajaddAppwriteClient
+    );
+
+    const tables = window.ajaddTablesDB;
+
+    function afficherMessage(texte, couleur) {
+        message.textContent = texte;
+        message.style.color = couleur;
+    }
+
+    async function afficherUtilisateurs() {
+
+        liste.innerHTML = `
+            <tr>
+                <td colspan="6">Chargement des utilisateurs...</td>
+            </tr>
+        `;
+
         try {
-            return JSON.parse(
-                localStorage.getItem("ajaddUtilisateurs") || "[]"
+
+            const resultat = await tables.listRows({
+                databaseId: DATABASE_ID,
+                tableId: TABLE_ID
+            });
+
+            liste.innerHTML = "";
+
+            const utilisateurs = resultat.rows.filter(u =>
+                String(u.role || "").toLowerCase() !== "pdg"
             );
-        } catch (e) {
-            return [];
-        }
-    }
 
-    function sauvegarderUtilisateurs(utilisateurs) {
-        localStorage.setItem(
-            "ajaddUtilisateurs",
-            JSON.stringify(utilisateurs)
-        );
-    }
+            if (utilisateurs.length === 0) {
+                liste.innerHTML = `
+                    <tr>
+                        <td colspan="6">Aucun utilisateur enregistré.</td>
+                    </tr>
+                `;
+                return;
+            }
 
-    function afficherUtilisateurs() {
-        const utilisateurs = obtenirUtilisateurs();
-        liste.innerHTML = "";
+            utilisateurs.forEach(u => {
 
-        const visibles = utilisateurs.filter(u =>
-            !["pdg", "administrateur_principal"].includes(
-                String(u.role || "").toLowerCase()
-            )
-        );
+                const ligne = document.createElement("tr");
 
-        if (visibles.length === 0) {
+                const valeurs = [
+                    u.nom_complet || "",
+                    u.identifiant || "",
+                    u.fonction || "",
+                    u.role || "",
+                    u.statut || ""
+                ];
+
+                valeurs.forEach((valeur, i) => {
+
+                    const cellule = document.createElement("td");
+                    cellule.textContent = valeur;
+
+                    if (i === 4) {
+                        cellule.className =
+                            valeur === "actif"
+                                ? "status-actif"
+                                : "status-suspendu";
+                    }
+
+                    ligne.appendChild(cellule);
+                });
+
+                const action = document.createElement("td");
+                action.textContent = "À configurer";
+
+                ligne.appendChild(action);
+                liste.appendChild(ligne);
+
+            });
+
+        } catch (erreur) {
+
+            console.error("Erreur de chargement :", erreur);
+
             liste.innerHTML = `
                 <tr>
-                    <td colspan="6">Aucun profil enregistré.</td>
+                    <td colspan="6">
+                        Impossible de charger les utilisateurs.
+                        Vérifiez les permissions Appwrite.
+                    </td>
                 </tr>
             `;
-            return;
         }
-
-        visibles.forEach(utilisateur => {
-            const ligne = document.createElement("tr");
-
-            const valeurs = [
-                utilisateur.nom || utilisateur.nom_complet || "",
-                utilisateur.identifiant || "",
-                utilisateur.fonction || "",
-                utilisateur.role || "",
-                utilisateur.statut || "actif"
-            ];
-
-            valeurs.forEach((valeur, position) => {
-                const cellule = document.createElement("td");
-                cellule.textContent = valeur;
-
-                if (position === 4) {
-                    cellule.className =
-                        valeur === "actif"
-                            ? "status-actif"
-                            : "status-suspendu";
-                }
-
-                ligne.appendChild(cellule);
-            });
-
-            const action = document.createElement("td");
-            const bouton = document.createElement("button");
-
-            bouton.textContent =
-                utilisateur.statut === "suspendu"
-                    ? "Activer"
-                    : "Suspendre";
-
-            bouton.className =
-                utilisateur.statut === "suspendu"
-                    ? "btn-success"
-                    : "btn-danger";
-
-            bouton.addEventListener("click", function () {
-                changerStatut(utilisateur.id);
-            });
-
-            action.appendChild(bouton);
-            ligne.appendChild(action);
-            liste.appendChild(ligne);
-        });
     }
 
-    function changerStatut(id) {
-        const utilisateurs = obtenirUtilisateurs();
-        const utilisateur = utilisateurs.find(u => u.id === id);
+    form.addEventListener("submit", async function (event) {
 
-        if (!utilisateur) return;
-
-        utilisateur.statut =
-            utilisateur.statut === "suspendu"
-                ? "actif"
-                : "suspendu";
-
-        sauvegarderUtilisateurs(utilisateurs);
-        afficherUtilisateurs();
-    }
-
-    form.addEventListener("submit", function (event) {
         event.preventDefault();
 
         const nom = document.getElementById("nom").value.trim();
@@ -442,16 +478,18 @@ th {
         const confirmation = document.getElementById("confirmation").value;
 
         if (motDePasse.length < 8) {
-            message.textContent =
-                "Le mot de passe doit comporter au moins 8 caractères.";
-            message.style.color = "red";
+            afficherMessage(
+                "Le mot de passe doit comporter au moins 8 caractères.",
+                "red"
+            );
             return;
         }
 
         if (motDePasse !== confirmation) {
-            message.textContent =
-                "Les deux mots de passe ne sont pas identiques.";
-            message.style.color = "red";
+            afficherMessage(
+                "Les deux mots de passe ne sont pas identiques.",
+                "red"
+            );
             return;
         }
 
@@ -459,46 +497,83 @@ th {
             document.querySelectorAll(".permissions input:checked")
         ).map(element => element.value);
 
-        const utilisateurs = obtenirUtilisateurs();
+        const bouton = form.querySelector('button[type="submit"]');
 
-        const existe = utilisateurs.some(u =>
-            String(u.identifiant || "").toLowerCase() === identifiant.toLowerCase() ||
-            String(u.email || "").toLowerCase() === email.toLowerCase()
-        );
+        bouton.disabled = true;
+        bouton.textContent = "Création en cours...";
 
-        if (existe) {
-            message.textContent =
-                "Cet identifiant ou cet e-mail existe déjà.";
-            message.style.color = "red";
-            return;
+        try {
+
+            const execution = await functions.createExecution({
+                functionId: FUNCTION_ID,
+                body: JSON.stringify({
+                    nom_complet: nom,
+                    identifiant: identifiant,
+                    email: email,
+                    fonction: fonction,
+                    role: role,
+                    statut: statut,
+                    password: motDePasse,
+                    permissions: permissions
+                }),
+                async: false,
+                path: "/",
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            let resultat;
+
+            try {
+                resultat = JSON.parse(execution.responseBody || "{}");
+            } catch (e) {
+                throw new Error("Réponse Appwrite illisible.");
+            }
+
+            const codeHTTP = Number(execution.responseStatusCode);
+
+            if (
+                codeHTTP < 200 ||
+                codeHTTP >= 300 ||
+                !resultat.success
+            ) {
+                throw new Error(
+                    resultat.message ||
+                    "La création du compte a échoué."
+                );
+            }
+
+            form.reset();
+
+            afficherMessage(
+                "Compte créé avec succès ! L'utilisateur peut maintenant se connecter.",
+                "#15803d"
+            );
+
+            await afficherUtilisateurs();
+
+        } catch (erreur) {
+
+            console.error("Erreur Appwrite :", erreur);
+
+            afficherMessage(
+                erreur.message ||
+                "Une erreur est survenue pendant la création.",
+                "red"
+            );
+
+        } finally {
+
+            document.getElementById("motDePasse").value = "";
+            document.getElementById("confirmation").value = "";
+
+            bouton.disabled = false;
+            bouton.textContent = "Enregistrer le profil";
+
         }
 
-        const nouvelUtilisateur = {
-            id: "AJADD-" + Date.now(),
-            nom: nom,
-            identifiant: identifiant,
-            email: email,
-            fonction: fonction,
-            role: role,
-            statut: statut,
-            permissions: permissions,
-            date_creation: new Date().toISOString()
-        };
-
-        utilisateurs.push(nouvelUtilisateur);
-        sauvegarderUtilisateurs(utilisateurs);
-
-        // Effacer immédiatement les champs sensibles.
-        document.getElementById("motDePasse").value = "";
-        document.getElementById("confirmation").value = "";
-
-        form.reset();
-
-        message.textContent =
-            "Profil enregistré localement. Le compte de connexion Appwrite reste à créer.";
-        message.style.color = "#b45309";
-
-        afficherUtilisateurs();
     });
 
     afficherUtilisateurs();
