@@ -1,1 +1,145 @@
+import { randomUUID } from "node:crypto";
 
+export default async ({ req, res, log, error }) => {
+  let userId = null;
+
+  try {
+    const endpoint = process.env.APPWRITE_ENDPOINT;
+    const projectId = process.env.APPWRITE_PROJECT_ID;
+    const databaseId = process.env.APPWRITE_DATABASE_ID;
+    const tableId = process.env.APPWRITE_TABLE_ID;
+    const apiKey = process.env.APPWRITE_API_KEY;
+
+    if (!endpoint || !projectId || !databaseId || !tableId || !apiKey) {
+      throw new Error("Configuration Appwrite incomplète.");
+    }
+
+    const body = req.bodyJson || {};
+
+    const nom = String(body.nom_complet || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const telephone = String(body.telephone || "").trim();
+    const sexe = String(body.sexe || "").trim();
+    const naissance = String(body.date_naissance || "").trim();
+    const adresse = String(body.adresse || "").trim();
+    const niveau = String(body.niveau_etudes || "").trim();
+    const motivation = String(body.motivation || "").trim();
+    const password = String(body.password || "");
+
+    if (!nom || !email || !telephone || !sexe ||
+        !naissance || !adresse || !motivation || !password) {
+      return res.json({
+        success: false,
+        message: "Veuillez remplir tous les champs obligatoires."
+      }, 400);
+    }
+
+    if (password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Le mot de passe doit contenir au moins 8 caractères."
+      }, 400);
+    }
+
+    if (nom.length > 150 || email.length > 254 ||
+        telephone.length > 30 || motivation.length > 5000) {
+      return res.json({
+        success: false,
+        message: "Certaines informations dépassent la taille autorisée."
+      }, 400);
+    }
+
+    const base = endpoint.replace(/\/+$/, "");
+    const headers = {
+      "Content-Type": "application/json",
+      "X-Appwrite-Project": projectId,
+      "X-Appwrite-Key": apiKey
+    };
+
+    // 1. Créer le compte Appwrite
+    userId = randomUUID();
+
+    const creationCompte = await fetch(`${base}/users`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        userId,
+        email,
+        password,
+        name: nom
+      })
+    });
+
+    const resultatCompte = await creationCompte.json();
+
+    if (!creationCompte.ok) {
+      log("Échec de création du compte Appwrite.");
+      return res.json({
+        success: false,
+        message: creationCompte.status === 409
+          ? "Cette adresse e-mail possède déjà un compte."
+          : "Impossible de créer le compte. Vérifiez les informations."
+      }, creationCompte.status);
+    }
+
+    // 2. Enregistrer la demande en attente
+    const donnees = {
+      user_id: userId,
+      nom_complet: nom,
+      email,
+      telephone,
+      sexe,
+      date_naissance: naissance,
+      adresse,
+      niveau_etudes: niveau,
+      motivation,
+      statut: "en_attente",
+      role_attribue: "",
+      departement: "",
+      permissions: "[]",
+      date_demande: new Date().toISOString(),
+      date_validation: "",
+      valide_par: "",
+      motif_refus: ""
+    };
+
+    const creationDemande = await fetch(
+      `${base}/tablesdb/${databaseId}/tables/${tableId}/rows`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          rowId: randomUUID(),
+          data: donnees,
+          permissions: []
+        })
+      }
+    );
+
+    if (!creationDemande.ok) {
+      // Supprimer le compte si l'enregistrement de la demande échoue.
+      await fetch(`${base}/users/${encodeURIComponent(userId)}`, {
+        method: "DELETE",
+        headers
+      });
+
+      userId = null;
+      throw new Error("Impossible d'enregistrer la demande d'inscription.");
+    }
+
+    log("Demande d'inscription enregistrée.");
+
+    return res.json({
+      success: true,
+      message: "Votre demande a été envoyée. Elle attend la validation du PDG."
+    }, 201);
+
+  } catch (e) {
+    error("Erreur lors de l'inscription publique : " + e.message);
+
+    return res.json({
+      success: false,
+      message: e.message || "Une erreur est survenue."
+    }, 500);
+  }
+};
