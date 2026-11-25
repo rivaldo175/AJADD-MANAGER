@@ -240,9 +240,7 @@ th {
                 </div>
 
                 <div class="field">
-                    <label for="confirmation">
-                        Confirmer le mot de passe
-                    </label>
+                    <label for="confirmation">Confirmer le mot de passe</label>
                     <input
                         type="password"
                         id="confirmation"
@@ -259,37 +257,21 @@ th {
             <div class="permissions">
 
                 <label><input type="checkbox" value="direction"> Direction générale</label>
-
                 <label><input type="checkbox" value="bureau"> Bureau exécutif</label>
-
                 <label><input type="checkbox" value="departements"> Départements</label>
-
                 <label><input type="checkbox" value="responsables"> Responsables</label>
-
                 <label><input type="checkbox" value="membres"> Membres</label>
-
                 <label><input type="checkbox" value="regions"> Régions</label>
-
                 <label><input type="checkbox" value="responsablesregionaux"> Responsables régionaux</label>
-
                 <label><input type="checkbox" value="evenements"> Événements</label>
-
                 <label><input type="checkbox" value="projetsevenementiels"> Projets événementiels</label>
-
                 <label><input type="checkbox" value="budgetsevenements"> Budgets événements</label>
-
                 <label><input type="checkbox" value="formations"> Formations</label>
-
                 <label><input type="checkbox" value="commerces"> Commerces</label>
-
                 <label><input type="checkbox" value="partenaires"> Partenaires</label>
-
                 <label><input type="checkbox" value="finance"> Finances</label>
-
                 <label><input type="checkbox" value="budgets"> Budgets</label>
-
                 <label><input type="checkbox" value="documents"> Documents</label>
-
                 <label><input type="checkbox" value="communications"> Communications</label>
 
             </div>
@@ -308,7 +290,6 @@ th {
         <h3>Liste des utilisateurs</h3>
 
         <div class="table-container">
-
             <table>
                 <thead>
                     <tr>
@@ -327,7 +308,6 @@ th {
                     </tr>
                 </tbody>
             </table>
-
         </div>
     </div>
 
@@ -343,11 +323,16 @@ th {
         session = JSON.parse(
             sessionStorage.getItem("ajaddSession") || "null"
         );
-    } catch (e) {
+    } catch (erreur) {
         session = null;
     }
 
-    if (!session || String(session.role).toLowerCase() !== "pdg") {
+    // Vérification du rôle PDG
+    const roleSession = String(session?.role || "")
+        .trim()
+        .toLowerCase();
+
+    if (!session || !session.userId || roleSession !== "pdg") {
         alert("Accès réservé au PDG.");
         window.location.replace("dashboard.html");
         return;
@@ -358,7 +343,7 @@ th {
     const message = document.getElementById("message");
 
     const DATABASE_ID = window.AJADD_DATABASE_ID;
-    const TABLE_ID = window.AJADD_TABLES.profils_utilisateurs;
+    const TABLE_ID = window.AJADD_TABLES?.profils_utilisateurs;
     const FUNCTION_ID = "ajadd-create-user";
 
     if (
@@ -401,7 +386,7 @@ th {
             liste.innerHTML = "";
 
             const utilisateurs = resultat.rows.filter(u =>
-                String(u.role || "").toLowerCase() !== "pdg"
+                String(u.role || "").trim().toLowerCase() !== "pdg"
             );
 
             if (utilisateurs.length === 0) {
@@ -425,14 +410,14 @@ th {
                     u.statut || ""
                 ];
 
-                valeurs.forEach((valeur, i) => {
+                valeurs.forEach((valeur, index) => {
 
                     const cellule = document.createElement("td");
                     cellule.textContent = valeur;
 
-                    if (i === 4) {
+                    if (index === 4) {
                         cellule.className =
-                            valeur === "actif"
+                            String(valeur).toLowerCase() === "actif"
                                 ? "status-actif"
                                 : "status-suspendu";
                     }
@@ -528,7 +513,7 @@ th {
 
             try {
                 resultat = JSON.parse(execution.responseBody || "{}");
-            } catch (e) {
+            } catch (erreur) {
                 throw new Error("Réponse Appwrite illisible.");
             }
 
