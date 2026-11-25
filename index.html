@@ -1,347 +1,139 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion | AJADD MANAGER</title>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #06172f, #103c32);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            background: white;
-            width: 100%;
-            max-width: 430px;
-            padding: 35px 28px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
-        }
-
-        .logo {
-            width: 115px;
-            height: 115px;
-            object-fit: contain;
-            margin-bottom: 15px;
-        }
-
-        h1 {
-            color: #082b4c;
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #b58b25;
-            font-weight: bold;
-            font-size: 12px;
-            margin-bottom: 25px;
-        }
-
-        .description {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #183653;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #ccc;
-            border-radius: 7px;
-            font-size: 15px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #c59b35;
-        }
-
-        .login-button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 7px;
-            background: #082b4c;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .login-button:hover {
-            background: #b58b25;
-        }
-
-        .login-button:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        .footer {
-            margin-top: 25px;
-            color: #777;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .message {
-            margin-top: 15px;
-            color: #b3261e;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion | AJADD MANAGER</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{min-height:100vh;background:linear-gradient(135deg,#06172f,#103c32);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-container{background:white;width:100%;max-width:430px;padding:35px 28px;border-radius:15px;text-align:center;box-shadow:0 10px 35px rgba(0,0,0,.3)}
+.logo{width:115px;height:115px;object-fit:contain;margin-bottom:15px}
+h1{color:#082b4c;font-size:28px;margin-bottom:8px}
+.subtitle{color:#b58b25;font-weight:bold;font-size:12px;margin-bottom:25px}
+.description{color:#666;font-size:14px;margin-bottom:25px;line-height:1.5}
+.form-group{text-align:left;margin-bottom:18px}
+label{display:block;margin-bottom:8px;color:#183653;font-weight:bold}
+input{width:100%;padding:14px;border:1px solid #ccc;border-radius:7px;font-size:15px}
+input:focus{outline:none;border-color:#c59b35}
+.login-button{width:100%;padding:15px;border:none;border-radius:7px;background:#082b4c;color:white;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px}
+.login-button:hover{background:#b58b25}
+.login-button:disabled{opacity:.6;cursor:wait}
+.footer{margin-top:25px;color:#777;font-size:12px;line-height:1.6}
+.message{margin-top:15px;color:#b3261e;font-size:13px;line-height:1.5}
+</style>
 </head>
-
 <body>
-
-    <div class="login-container">
-
-        <img
-            src="images/logo-ajadd.png"
-            alt="Logo AJADD-TOGO"
-            class="logo"
-            onerror="this.style.display='none'"
-        >
-
-        <h1>AJADD MANAGER</h1>
-
-        <p class="subtitle">
-            AMICALE DES JEUNES AMBITIEUX ET DYNAMIQUES POUR LE DÉVELOPPEMENT
-        </p>
-
-        <p class="description">
-            Bienvenue sur la plateforme officielle de gestion d'AJADD-TOGO.
-            Veuillez vous connecter.
-        </p>
-
-        <form id="loginForm">
-
-            <div class="form-group">
-                <label for="identifiant">Adresse e-mail</label>
-
-                <input
-                    type="email"
-                    id="identifiant"
-                    placeholder="Votre adresse e-mail"
-                    autocomplete="username"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Votre mot de passe"
-                    autocomplete="current-password"
-                    required
-                >
-            </div>
-
-            <button type="submit" class="login-button">
-                SE CONNECTER
-            </button>
-
-            <p id="message" class="message"></p>
-
-        </form>
-
-        <div class="footer">
-            AJADD-TOGO © 2026<br>
-            Ensemble pour un avenir meilleur
-        </div>
-
-    </div>
-
-    <!-- SDK APPWRITE -->
-    <script src="https://cdn.jsdelivr.net/npm/appwrite@29.0.0"></script>
-
-    <!-- CONFIGURATION APPWRITE -->
-    <script src="appwrite.js"></script>
-
-    <!-- AUTHENTIFICATION AJADD -->
-    <script>
-
-    document.getElementById("loginForm").addEventListener("submit", async function(event) {
-
-        event.preventDefault();
-
-        const email = document.getElementById("identifiant").value.trim();
-        const motDePasse = document.getElementById("password").value;
-
-        const message = document.getElementById("message");
-        const bouton = document.querySelector(".login-button");
-
-        message.style.color = "#b3261e";
-        message.textContent = "Connexion en cours...";
-
-        bouton.disabled = true;
-
-        try {
-
-            // Vérifier la configuration Appwrite
-            if (!window.ajaddAccount || !window.ajaddTablesDB) {
-                throw new Error("Configuration Appwrite introuvable.");
-            }
-
-            let utilisateur = null;
-
-            // 1. Vérifier si une session existe déjà
-            try {
-
-                utilisateur = await window.ajaddAccount.get();
-
-                // Si un autre compte est connecté, fermer sa session
-                if (utilisateur.email.toLowerCase() !== email.toLowerCase()) {
-
-                    await window.ajaddAccount.deleteSession({
-                        sessionId: "current"
-                    });
-
-                    utilisateur = null;
-                }
-
-            } catch (erreurSession) {
-
-                if (
-                    erreurSession.code === 401 ||
-                    erreurSession.type === "user_unauthorized"
-                ) {
-                    utilisateur = null;
-                } else {
-                    throw erreurSession;
-                }
-            }
-
-            // 2. Créer une session uniquement si nécessaire
-            if (!utilisateur) {
-
-                await window.ajaddAccount.createEmailPasswordSession({
-                    email: email,
-                    password: motDePasse
-                });
-
-                utilisateur = await window.ajaddAccount.get();
-            }
-
-            // 3. Vérifier le compte connecté
-            if (utilisateur.email.toLowerCase() !== email.toLowerCase()) {
-                throw new Error("Le compte connecté ne correspond pas à cette adresse e-mail.");
-            }
-
-            // 4. Rechercher le profil AJADD
-            const resultat = await window.ajaddTablesDB.listRows({
-
-                databaseId: window.AJADD_DATABASE_ID,
-
-                tableId: window.AJADD_TABLES.profils_utilisateurs,
-
-                queries: [
-                    Appwrite.Query.equal("user_id", utilisateur.$id)
-                ]
-
-            });
-
-            if (!resultat.rows || resultat.rows.length === 0) {
-                throw new Error(
-                    "Aucun profil AJADD associé à ce compte. Vérifiez le profil dans Appwrite."
-                );
-            }
-
-            // 5. Récupérer le profil
-            const profil = resultat.rows[0];
-
-            // 6. Vérifier le statut
-            if (profil.statut !== "actif") {
-                throw new Error(
-                    "Ce compte est inactif. Contactez le PDG."
-                );
-            }
-
-            // 7. Préparer la session AJADD
-            const session = {
-
-                userId: utilisateur.$id,
-
-                identifiant: profil.identifiant,
-
-                nom: profil.nom_complet,
-
-                fonction: profil.fonction,
-
-                role: profil.role,
-
-                dateConnexion: new Date().toISOString()
-
-            };
-
-            sessionStorage.setItem(
-                "ajaddSession",
-                JSON.stringify(session)
-            );
-
-            // 8. Confirmer la connexion
-            message.style.color = "green";
-
-            message.textContent =
-                "Connexion réussie. Ouverture du tableau de bord...";
-
-            // 9. Ouvrir le tableau de bord
-            window.location.href = "dashboard.html";
-
-        } catch (erreur) {
-
-            console.error(
-                "Erreur de connexion AJADD :",
-                erreur
-            );
-
-            message.style.color = "#b3261e";
-
-            message.textContent =
-                "Connexion impossible : " + erreur.message;
-
-        } finally {
-
-            bouton.disabled = false;
-
-        }
-
-    });
-
-    </script>
-
+<div class="login-container">
+<img src="images/logo-ajadd.png" alt="Logo AJADD-TOGO" class="logo" onerror="this.style.display='none'">
+<h1>AJADD MANAGER</h1>
+<p class="subtitle">AMICALE DES JEUNES AMBITIEUX ET DYNAMIQUES POUR LE DÉVELOPPEMENT</p>
+<p class="description">Bienvenue sur la plateforme officielle de gestion d'AJADD-TOGO. Veuillez vous connecter.</p>
+
+<form id="loginForm">
+<div class="form-group">
+<label for="identifiant">Adresse e-mail</label>
+<input type="email" id="identifiant" placeholder="Votre adresse e-mail" autocomplete="username" required>
+</div>
+<div class="form-group">
+<label for="password">Mot de passe</label>
+<input type="password" id="password" placeholder="Votre mot de passe" autocomplete="current-password" required>
+</div>
+<button type="submit" class="login-button">SE CONNECTER</button>
+<p id="message" class="message"></p>
+</form>
+
+<div class="footer">AJADD-TOGO © 2026<br>Ensemble pour un avenir meilleur</div>
+</div>
+
+<script src="https://sdk.appwrite.io/web/29.3.1/sdk.min.js"></script>
+<script src="appwrite.js"></script>
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(event) {
+event.preventDefault();
+
+const email=document.getElementById("identifiant").value.trim();
+const motDePasse=document.getElementById("password").value;
+const message=document.getElementById("message");
+const bouton=document.querySelector(".login-button");
+
+message.style.color="#b3261e";
+message.textContent="Connexion en cours...";
+bouton.disabled=true;
+
+try {
+if(!window.ajaddAccount || !window.ajaddTablesDB) {
+throw new Error("Configuration Appwrite introuvable.");
+}
+
+// Fermer toute ancienne session pour authentifier le compte saisi.
+try {
+await window.ajaddAccount.deleteSession({sessionId:"current"});
+} catch(erreur) {
+// Aucune session précédente : continuer.
+}
+
+const nouvelleSession=await window.ajaddAccount.createEmailPasswordSession({
+email:email,
+password:motDePasse
+});
+
+const utilisateur=await window.ajaddAccount.get();
+
+const resultat=await window.ajaddTablesDB.listRows({
+databaseId:window.AJADD_DATABASE_ID,
+tableId:window.AJADD_TABLES.profils_utilisateurs,
+queries:[Appwrite.Query.equal("user_id",utilisateur.$id)]
+});
+
+if(!resultat.rows || resultat.rows.length===0) {
+throw new Error("Aucun profil AJADD associé à ce compte.");
+}
+
+const profil=resultat.rows[0];
+
+if(String(profil.statut).toLowerCase()!=="actif") {
+throw new Error("Ce compte est inactif. Contactez le PDG.");
+}
+
+const role=String(profil.role || "").trim().toLowerCase();
+
+if(!role) {
+throw new Error("Le rôle de ce compte n'est pas défini dans Appwrite.");
+}
+
+let permissions=profil.permissions || [];
+
+if(typeof permissions==="string") {
+try { permissions=JSON.parse(permissions); }
+catch(e) { permissions=[]; }
+}
+
+const session={
+userId:utilisateur.$id,
+identifiant:profil.identifiant || email,
+nom:profil.nom_complet || utilisateur.name,
+fonction:profil.fonction || "",
+role:role,
+permissions:permissions,
+dateConnexion:new Date().toISOString()
+};
+
+sessionStorage.setItem("ajaddSession",JSON.stringify(session));
+
+message.style.color="green";
+message.textContent="Connexion réussie. Ouverture du tableau de bord...";
+
+window.location.replace("dashboard.html");
+
+} catch(erreur) {
+console.error("Erreur de connexion AJADD :",erreur);
+message.style.color="#b3261e";
+message.textContent="Connexion impossible : "+erreur.message;
+} finally {
+bouton.disabled=false;
+}
+});
+</script>
 </body>
 </html>
