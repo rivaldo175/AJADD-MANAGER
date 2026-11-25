@@ -84,7 +84,7 @@ export default async ({ req, res, log, error }) => {
       return res.json({
         success: false,
         message: "Accès réservé au PDG."
-      }, 504);
+      }, 403);
     }
 
     // 3. Lire les informations
