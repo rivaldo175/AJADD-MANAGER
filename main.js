@@ -41,20 +41,25 @@ const MODULES_AUTORISES = [
 
 export default async ({ req, res, log, error }) => {
   let nouvelUtilisateurId = null;
+  let etape = "Initialisation";
 
   try {
-    // Vérifier l'identité de la personne connectée
+    // 1. Vérifier la connexion
+    etape = "Vérification de la connexion";
+
     const userId = req.headers["x-appwrite-user-id"];
     const userJWT = req.headers["x-appwrite-user-jwt"];
 
     if (!userId || !userJWT) {
       return res.json({
         success: false,
-        message: "Connexion obligatoire."
+        message: "Connexion obligatoire. Reconnectez-vous."
       }, 401);
     }
 
-    // Vérifier le profil du PDG
+    // 2. Vérifier le PDG
+    etape = "Vérification du profil PDG";
+
     const clientPDG = new Client()
       .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
       .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
@@ -72,7 +77,7 @@ export default async ({ req, res, log, error }) => {
 
     if (
       userId !== PDG_ID ||
-      profilPDG.total !== 1 ||
+      profilPDG.rows.length !== 1 ||
       profilPDG.rows[0].role !== "pdg" ||
       profilPDG.rows[0].statut !== "actif"
     ) {
@@ -82,7 +87,9 @@ export default async ({ req, res, log, error }) => {
       }, 403);
     }
 
-    // Lire les informations du formulaire
+    // 3. Lire les informations
+    etape = "Lecture du formulaire";
+
     const body = req.bodyJson || {};
 
     const nom = String(body.nom_complet || "").trim();
@@ -121,7 +128,9 @@ export default async ({ req, res, log, error }) => {
       }, 400);
     }
 
-    // Vérifier les permissions demandées
+    // 4. Vérifier les permissions
+    etape = "Vérification des permissions";
+
     const permissionsDemandees = Array.isArray(body.permissions)
       ? body.permissions
       : [];
@@ -134,16 +143,28 @@ export default async ({ req, res, log, error }) => {
       }
     }
 
-    // Client serveur
+    // 5. Préparer le client serveur
+    etape = "Connexion au serveur Appwrite";
+
+    const apiKey = req.headers["x-appwrite-key"];
+
+    if (!apiKey) {
+      throw new Error(
+        "Clé API temporaire absente. Vérifiez les autorisations de la fonction."
+      );
+    }
+
     const clientServeur = new Client()
       .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
       .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-      .setKey(req.headers["x-appwrite-key"] || "");
+      .setKey(apiKey);
 
     const users = new Users(clientServeur);
     const tables = new TablesDB(clientServeur);
 
-    // Vérifier si l'identifiant existe déjà
+    // 6. Vérifier les doublons
+    etape = "Vérification de l'identifiant";
+
     const doublons = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILS,
@@ -159,17 +180,21 @@ export default async ({ req, res, log, error }) => {
       }, 409);
     }
 
-    // Créer le véritable compte Appwrite
+    // 7. Créer le compte Appwrite Auth
+    etape = "Création du compte Appwrite Auth";
+
     const nouvelUtilisateur = await users.create({
       userId: ID.unique(),
-      email,
-      password,
+      email: email,
+      password: password,
       name: nom
     });
 
     nouvelUtilisateurId = nouvelUtilisateur.$id;
 
-    // Créer le profil dans la base de données
+    // 8. Enregistrer le profil
+    etape = "Enregistrement du profil dans la base de données";
+
     await tables.createRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILS,
@@ -177,10 +202,10 @@ export default async ({ req, res, log, error }) => {
       data: {
         user_id: nouvelUtilisateurId,
         nom_complet: nom,
-        identifiant,
-        fonction,
-        role,
-        statut,
+        identifiant: identifiant,
+        fonction: fonction,
+        role: role,
+        statut: statut,
         permissions: JSON.stringify(permissions),
         date_creation: new Date().toISOString()
       },
@@ -190,37 +215,46 @@ export default async ({ req, res, log, error }) => {
       ]
     });
 
-    log("Utilisateur créé : " + nouvelUtilisateurId);
+    log("Utilisateur créé avec succès : " + nouvelUtilisateurId);
 
     return res.json({
       success: true,
-      message: "Le compte utilisateur a été créé avec succès.",
+      message: "Compte créé avec succès.",
       userId: nouvelUtilisateurId
     }, 201);
 
   } catch (err) {
-    error("Erreur création utilisateur : " + err.message);
 
-    // Supprimer le compte si la création du profil échoue
+    const detailErreur = err?.message || String(err);
+
+    error("ÉCHEC À L'ÉTAPE : " + etape);
+    error("DÉTAIL DE L'ERREUR : " + detailErreur);
+
+    // Supprimer le compte Auth si le profil n'a pas pu être enregistré
     if (nouvelUtilisateurId) {
       try {
-        const clientServeur = new Client()
-          .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
-          .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-          .setKey(req.headers["x-appwrite-key"] || "");
+        const apiKey = req.headers["x-appwrite-key"];
 
-        const users = new Users(clientServeur);
-        await users.delete({
-          userId: nouvelUtilisateurId
-        });
+        if (apiKey) {
+          const clientNettoyage = new Client()
+            .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
+            .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+            .setKey(apiKey);
+
+          const usersNettoyage = new Users(clientNettoyage);
+
+          await usersNettoyage.delete({
+            userId: nouvelUtilisateurId
+          });
+        }
       } catch (deleteError) {
-        error("Erreur lors du nettoyage : " + deleteError.message);
+        error("ÉCHEC DU NETTOYAGE : " + deleteError.message);
       }
     }
 
     return res.json({
       success: false,
-      message: "Impossible de créer le compte. Vérifiez les informations et les permissions de la fonction."
+      message: "Échec à l'étape : " + etape + ". Détail : " + detailErreur
     }, 500);
   }
 };
