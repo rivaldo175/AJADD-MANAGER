@@ -75,30 +75,22 @@ export default async ({ req, res, log, error }) => {
       ]
     });
 
-   const rolePDG = String(profilPDG.rows[0]?.role || "")
-  .trim()
-  .toLowerCase();
+   if (
+      userId !== PDG_ID ||
+      profilPDG.rows.length !== 1 ||
+      profilPDG.rows[0].role !== "pdg" ||
+      profilPDG.rows[0].statut !== "actif"
+    ) {
+      return res.json({
+        success: false,
+        message: "Accès réservé au PDG."
+      }, 504);
+    }
 
-const statutPDG = String(profilPDG.rows[0]?.statut || "")
-  .trim()
-  .toLowerCase();
+    // 3. Lire les informations
+    etape = "Lecture du formulaire";
 
-if (
-  userId !== PDG_ID ||
-  profilPDG.rows.length !== 1 ||
-  rolePDG !== "pdg" ||
-  statutPDG !== "actif"
-) {
-  return res.json({
-    success: false,
-    message: "Accès réservé au PDG."
-  }, 403);
-}
-
-// 3. Lire les informations
-etape = "Lecture du formulaire";
-
-const body = req.bodyJson || {};
+    const body = req.bodyJson || {};
 
     const nom = String(body.nom_complet || "").trim();
     const identifiant = String(body.identifiant || "").trim();
