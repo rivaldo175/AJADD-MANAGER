@@ -1,0 +1,15 @@
+{
+  "name": "ajadd-create-user",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "node-appwrite": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}
